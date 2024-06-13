@@ -1,0 +1,29 @@
+#Visual studio
+Debug/
+Release/
+datam/Debug/
+datam/Release/
+datam/x64/
+x64/
+.vs/
+.rsrc/
+
+.klocwork/
+
+*.o
+*.d
+*.db
+*.sdf
+*.suo
+*.pdb
+*.data
+*.pdata
+*.rdata
+*.reloc
+*.text
+*.vcxproj.user
+*.aps
+
+
+# Enforce a “no spaces in filenames” policy
+**\ **
