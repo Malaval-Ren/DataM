@@ -1,16 +1,16 @@
 
-# **ConvM**
+# **DataM**
 
-![Alt text](./MM_PowerUp_256x256.png "ConvM")
+![Alt text](./MM_PowerUp_256x256.png "DataM") ![Alt text](./gplv3-127x51.png "license") 
 
-# Convert many stuff
+## Convert many stuff
 
 Just a little software to help **Apple IIGS** cross dev
 
-# help usage :
+## help usage :
 
 ```bash
-datam.exe v1.4.7.9, (c) R. Malaval & F. Mure 2022-23.
+datam.exe v1.7.9.19, (c) R. Malaval & F. Mure 2022-23.
 
 Usage: datam <convmspec> <option> "<filespec>" "<output folder>"
 
@@ -27,7 +27,7 @@ Usage: datam <convmspec> <option> "<filespec>" "<output folder>"
 
 note: character '…' is converted to character '/' to be compliant with the picture where the char '/' is a '…'
 
-# Special thank's to :
+## Special thank's to :
 
 co worker - **Frédéric Mure**
 
