@@ -46,8 +46,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="datam.rc">
+    <Resource Include="datam.res">
       <Filter>Fichiers de ressources</Filter>
-    </ResourceCompile>
+    </Resource>
   </ItemGroup>
 </Project>

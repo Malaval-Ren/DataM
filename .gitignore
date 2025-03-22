@@ -24,7 +24,6 @@ x86/
 *.reloc
 *.text
 *.vcxproj.user
-*.vcxproj.filter
 *.aps
 
 # Enforce a “no spaces in filenames” policy
