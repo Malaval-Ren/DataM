@@ -2,7 +2,7 @@
  *
  * A tool to help cross dev for Apple II GS.
  *
- * Copyright(C) 2023 - 2024 Renaud Malaval <renaud.malaval@free.fr>.
+ * Copyright(C) 2023 - 2025 Renaud Malaval <renaud.malaval@free.fr>.
  *
  * This program is free software : you can redistribute it and /or modify
  *  it under the terms of the GNU General Public License as published by
@@ -135,9 +135,9 @@ char *parseSpaceChar( char **pPathname)
 
             //if (iModif != 0)
             //{
-            //  //printf( "Full in  : %s\n", *pPathname);
-            //  printf( "Working file : %s\n\n", pResultFilename);
-            //  printf( "Space char corrected is = %d\n", iModif);
+            //  //(void )printf( "Full in  : %s\n", *pPathname);
+            //  (void )printf( "Working file : %s\n\n", pResultFilename);
+            //  (void )printf( "Space char corrected is = %d\n", iModif);
             //}
 
             free( *pPathname);
@@ -169,10 +169,10 @@ char *getBasePathname( const char *pPathname, unsigned int uExtension)
     if (pPathname)
     {
         uLenResultFilename = strlen( pPathname) + (size_t )uExtension;
-        pResultFilename = (char *)calloc(1,((size_t )( uLenResultFilename) + (size_t )( 1)));
+        pResultFilename = (char *)calloc( 1,((size_t )( uLenResultFilename) + (size_t )( 1)));
         if (pResultFilename)
         {
-            (void)strncpy_s(pResultFilename, uLenResultFilename, pPathname, (int )strlen( pPathname));
+            (void )strncpy_s( pResultFilename, uLenResultFilename, pPathname, (int )strlen( pPathname));
             //(void)strncpy( pResultFilename, pPathname, uLenResultFilename);
 
             pBackRunning = (char *)&(pResultFilename[(int )strlen( pResultFilename) - 1]);
@@ -207,7 +207,7 @@ char *getFileName( char *pPathname)
     {
         for (pRunning = pPathname; *pRunning; pRunning++)
         {
-            if ((*pRunning == '/') || (*pRunning == '\\') || (*pRunning == ':'))
+            if ( (*pRunning == '/') || (*pRunning == '\\') || (*pRunning == ':') )
             {
                 pReturnName = pRunning;
             }
@@ -215,7 +215,7 @@ char *getFileName( char *pPathname)
 
         if (pReturnName)
         {
-            if ((*pReturnName == '/') || (*pReturnName == '\\') || (*pReturnName == ':'))
+            if ( (*pReturnName == '/') || (*pReturnName == '\\') || (*pReturnName == ':') )
             {
                 pReturnName++;
             }
@@ -244,9 +244,9 @@ unsigned int getMyFileSize( char *pPathname)
     {
         if (pFile)
         {
-            fseek( pFile, 0L, SEEK_END);
+            (void )fseek( pFile, 0L, SEEK_END);
             uSize = ftell( pFile);
-            fclose( pFile);
+            (void )fclose( pFile);
         }
     }
 
@@ -277,7 +277,7 @@ char *readFileToMemory( char *pPathname)
         if (pCharData)
         {
             iError = fopen_s( &pFile, pPathname, "rb, ccs=UTF-8");
-            if ((iError == 0) && (pFile != NULL))
+            if ( (iError == 0) && (pFile != NULL) )
             {
                 uNumberOfElementRead = fread( pCharData, iFileSize, 1, pFile);
                 (void )fclose( pFile);
@@ -287,7 +287,7 @@ char *readFileToMemory( char *pPathname)
                 }
             }
 
-            if ((iError != 0) && (pFile != NULL))
+            if ( (iError != 0) && (pFile != NULL) )
             {
                 free( pCharData);
                 pCharData = NULL;
@@ -342,16 +342,16 @@ BOOL pathFileExists( const char *pPathname)
     BOOL        bFileExists = FALSE;
     FILE       *pFile = NULL;
 
-    if (fopen_s(&pFile, pPathname, "rb"))
+    if (fopen_s( &pFile, pPathname, "rb") )
     {
         bFileExists = FALSE;
     }
     else
     {
         bFileExists = TRUE;
-        if (pFile)
+        if ( pFile)
         {
-            fclose(pFile);
+            (void )fclose( pFile);
         }
     }
 
@@ -370,15 +370,19 @@ BOOL directoryExists( const char *pAbsolutePath)
 {
     BOOL bFolderExists = FALSE;
 
-    if (_access(pAbsolutePath, 0) == 0)
+    if (_access( pAbsolutePath, 0) == 0)
     {
         struct stat status;
 
-        (void)stat(pAbsolutePath, &status);
+        (void )stat( pAbsolutePath, &status);
         if ((status.st_mode & S_IFDIR) != 0)
+        {
             bFolderExists = TRUE;
+        }
         else
+        {
             bFolderExists = FALSE;
+        }
     }
 
     return bFolderExists;
@@ -406,45 +410,45 @@ void exitOnError( char *pExplain, char *pDetail, char *pInfo, unsigned int uErro
         pEndString = "\"";
         pSpaceString = " ";
 
-        uLen = strlen((const char*)pExplain);
+        uLen = strlen( (const char *)pExplain);
         if (pDetail)
         {
-            uLen += strlen((const char*)pDetail);
+            uLen += strlen( (const char *)pDetail);
         }
         if (pInfo)
         {
-            uLen += strlen((const char*)pInfo);
+            uLen += strlen( (const char *)pInfo);
         }
-        uLen += (size_t)32;    // a marge for char ' '; '"'
+        uLen += (size_t )32;    // a marge for char ' '; '"'
 
         pMessage = (char *)calloc( 1, uLen);
         if (pMessage)
         {
-            (void)strncpy_s( pMessage, uLen, (const char *)pExplain, strlen((const char *)pExplain));
+            (void )strncpy_s( pMessage, uLen, (const char *)pExplain, strlen( (const char *)pExplain));
 
             if (pDetail)
             {
-                pMessage = strcat( pMessage, (const char*)pSpaceString);
-                pMessage = strcat( pMessage, (const char*)pSpaceString);
-                pMessage = strcat( pMessage, (const char*)pEndString);
-                pMessage = strcat( pMessage, (const char*)pDetail);
-                pMessage = strcat( pMessage, (const char*)pEndString);
+                pMessage = strcat( pMessage, (const char *)pSpaceString);
+                pMessage = strcat( pMessage, (const char *)pSpaceString);
+                pMessage = strcat( pMessage, (const char *)pEndString);
+                pMessage = strcat( pMessage, (const char *)pDetail);
+                pMessage = strcat( pMessage, (const char *)pEndString);
             }
 
             if (pInfo)
             {
-                pMessage = strcat( pMessage, (const char*)pSpaceString);
-                pMessage = strcat( pMessage, (const char*)pSpaceString);
-                pMessage = strcat( pMessage, (const char*)pEndString);
-                pMessage = strcat( pMessage, (const char*)pInfo);
-                pMessage = strcat( pMessage, (const char*)pEndString);
+                pMessage = strcat( pMessage, (const char *)pSpaceString);
+                pMessage = strcat( pMessage, (const char *)pSpaceString);
+                pMessage = strcat( pMessage, (const char *)pEndString);
+                pMessage = strcat( pMessage, (const char *)pInfo);
+                pMessage = strcat( pMessage, (const char *)pEndString);
             }
 
-            printf("DATAM : %s\n", pMessage);
+            (void )printf( "DATAM : %s\n", pMessage);
 
-            free(pMessage);
+            free( pMessage);
         }
     }
 
-    exit(uError);
+    exit( uError);
 }

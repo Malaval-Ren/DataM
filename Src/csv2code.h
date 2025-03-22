@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-    char *convertCsvToCode( char *pInputFile, unsigned int uDataSize, unsigned int puOutputDataSize);
+    char *convertCsvToCode( char *pInputFile, unsigned int uDataSize, unsigned int *puOutputDataSize);
 
 
 #ifdef __cplusplus

@@ -2,7 +2,7 @@
  *
  * A tool to help cross dev for Apple II GS.
  *
- * Copyright(C) 2023 - 2024 Renaud Malaval <renaud.malaval@free.fr>.
+ * Copyright(C) 2023 - 2025 Renaud Malaval <renaud.malaval@free.fr>.
  *
  * This program is free software : you can redistribute it and /or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
  *
  * return size of pOutputData
  */
-char *convertCsvToCode(char *pInputFile, unsigned int uDataSize, unsigned int *puOutputDataSize)
+char *convertCsvToCode( char *pInputFile, unsigned int uDataSize, unsigned int *puOutputDataSize)
 {
     char                   *pOutputFileData = NULL;
     char                   *pInputRunner = NULL;

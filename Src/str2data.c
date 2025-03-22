@@ -2,7 +2,7 @@
  *
  * A tool to help cross dev for Apple II GS.
  *
- * Copyright(C) 2023 - 2024 Renaud Malaval <renaud.malaval@free.fr>.
+ * Copyright(C) 2023 - 2025 Renaud Malaval <renaud.malaval@free.fr>.
  *
  * This program is free software : you can redistribute it and /or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,30 +49,30 @@ void findNumLinesLst( char *pInputFile, unsigned short int *puNumLines, unsigned
     char                    line[512] = {0};
     unsigned short int      uLineSize = 0;
 
-    if ((pInputFile) && (puNumLines) && (puDataSize))
+    if ( (pInputFile) && (puNumLines) && (puDataSize) )
     {
         *puNumLines = 0;
         *puDataSize = 0;
 
-        pFile = fopen(pInputFile, "r");
+        pFile = fopen( pInputFile, "r");
         if (pFile != NULL)
         {
-            while (fgets(line, sizeof(line), pFile))
+            while (fgets( line, sizeof(line), pFile) )
             {
-                if ((line[0] != '/') && (line[0] != '\n'))
+                if ( (line[0] != '/') && (line[0] != '\n') )
                 {
                     *puNumLines += 1;
-                    uLineSize = (unsigned short int)strlen(line);
+                    uLineSize = (unsigned short int )strlen( line);
                     if (line[uLineSize - 1] == '\n')
                     {
-                        // printf("#%02d : %d : %s", *puNumLines, *puDataSize, line);
+                        // (void )printf( "#%02d : %d : %s", *puNumLines, *puDataSize, line);
                         //uLineSize -= 1;
                         *puDataSize += uLineSize;
                     }
                 }
             }
 
-            fclose(pFile);
+            fclose( pFile);
         }
     }
     return;
@@ -104,10 +104,10 @@ char *mysentence( char *pOutputFileData, unsigned short int uNumber)
         {
             pDataPic++;
             pDataStr = (char *)pDataPic;
-            pDataStr += ((uMaxPic * sizeof(short int)) + (unsigned short int)pDataPic[uNumber]);
+            pDataStr += ((uMaxPic * sizeof( short int)) + (unsigned short int )pDataPic[uNumber]);
         }
     }
-    printf(" result : %u : %s\n", uNumber, pDataStr);
+    (void )printf( " result : %u : %s\n", uNumber, pDataStr);
 
     return pDataStr;
 }
@@ -138,32 +138,32 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
     unsigned short int  uOutputDataSize = 0;
     //unsigned short int  uIndex = 0;
 
-    if ((pInputFileName) && (pOutputFileData) && (uNumLines) && (uDataSize))
+    if ( (pInputFileName) && (pOutputFileData) && (uNumLines) && (uDataSize) )
     {
         puTable = (unsigned short int *)pOutputFileData;
         *puTable = uNumLines;
         puTable++;
-        pRunning = (char *)puTable + (unsigned short int)(uNumLines * (unsigned short int)sizeof( unsigned short int));
+        pRunning = (char *)puTable + (unsigned short int )(uNumLines * (unsigned short int )sizeof( unsigned short int));
 
         pFile = fopen( pInputFileName, "rb, ccs=UTF-8");
         if (pFile != NULL)
         {
             while (fgets( line, sizeof( line), pFile))
             {
-                if ((line[0] != '/') && (line[0] != '\n'))      // not a comment line
+                if ( ((line[0] != '/') && (line[1] != '*')) && (line[0] != '\n') )      // not a comment line
                 {
-                    uLineSize = (unsigned short int)strlen( line);
+                    uLineSize = (unsigned short int )strlen( line);
                     if (uLineSize > 0)
                     {
                         if (uLineSize < 512)
                         {
-                            if ((uLineSize == 2) && (line[0] == '\r') && (line[1] == '\n'))
+                            if ( (uLineSize == 2) && (line[0] == '\r') && (line[1] == '\n') )
                             {
                                 // Drop second empty line
                                 line[uLineSize - 1] = '\0';
                             }
 
-                            if ((line[uLineSize - 1] == '\n') && (line[uLineSize - 2] == '\r'))
+                            if ( (line[uLineSize - 1] == '\n') && (line[uLineSize - 2] == '\r') )
                             {
                                 pRunStr = pRunning;
                                 line[uLineSize - 1] = '\0';
@@ -172,13 +172,13 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
                                 uNumberOfCharRemoved = 0;
                                 for (uLoop = 0; uLoop < uLineSize; uLoop++)
                                 {
-                                    if ((line[uLoop] == '\\') && (line[uLoop + 1] == 'n'))
+                                    if ( (line[uLoop] == '\\') && (line[uLoop + 1] == 'n') )
                                     {
                                         *pRunning = 10;
                                         uLoop++;
                                         uNumberOfCharRemoved++;
                                     }
-                                    else if ((line[uLoop] == '\\') && (line[uLoop + 1] == 't'))
+                                    else if ( (line[uLoop] == '\\') && (line[uLoop + 1] == 't') )
                                     {
                                         *pRunning = 9;
                                         uLoop++;
@@ -195,13 +195,13 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
                                     pRunning++;
                                 }
 
-                                //if (*(unsigned int*)pRunning == 0xFdFdFdFd)
+                                //if (*(unsigned int *)pRunning == 0xFdFdFdFd)
                                 //{
-                                //    printf("Out of memory : 'pOutputFileData' buffer is too small\n");
+                                //    (void )printf( "Out of memory : 'pOutputFileData' buffer is too small\n");
                                 //    uOutputDataSize = 0;
                                 //    break;
                                 //}
-                                //printf( "a line %03u: len= %04u - %s\t%d\n", uIndex, (unsigned int)strlen( pRunStr) + 1, pRunStr, uOffset);
+                                //(void )printf( "a line %03u: len= %04u - %s\t%d\n", uIndex, (unsigned int)strlen( pRunStr) + 1, pRunStr, uOffset);
                                 //uIndex++;
 
                                 *puTable = uOffset;
@@ -211,7 +211,7 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
                         }
                         else
                         {
-                            printf( "Out of memory : 'line' buffer is too small\n");
+                            (void )printf( "Out of memory : 'line' buffer is too small\n");
                             uOutputDataSize = 0;
                             break;
                         }
@@ -219,7 +219,7 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
                 }
             }
 
-            fclose( pFile);
+            (void )fclose( pFile);
 
             // validate len of data
             uOutputDataSize = 0;
@@ -232,7 +232,7 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
                 }
             }
 
-            printf("\n");
+            (void )printf( "\n");
         }
     }
 
@@ -262,20 +262,20 @@ void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsig
         pFile = fopen( pInputFile, "r");
         if (pFile != NULL)
         {
-            while (fgets(line, sizeof( line), pFile))
+            while (fgets( line, sizeof( line), pFile))
             {
                 if (line[0] == 's')
                 {
                     char *pPosition = strchr( line, '"');
                     char *pr_position = strrchr( line, '"');
 
-                    if (((pPosition) && (pr_position)) && (pr_position > pPosition))
+                    if ( ( (pPosition) && (pr_position) ) && (pr_position > pPosition) )
                     {
                         uLineSize = (unsigned short int )(pr_position - pPosition);
 
                         *puNumLines += 1;
-                        uLineSize = (unsigned short )strlen(line);
-                        if ((line[uLineSize - 1] == '\n') && (line[uLineSize - 2] == ',') && (line[uLineSize - 3] == '"'))
+                        uLineSize = (unsigned short )strlen( line);
+                        if ( (line[uLineSize - 1] == '\n') && (line[uLineSize - 2] == ',') && (line[uLineSize - 3] == '"') )
                         {
                             // printf("#%02d : %d : %s", *puNumLines, *puDataSize, line);
                             uLineSize -= 3;
@@ -285,7 +285,7 @@ void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsig
                 }
             }
 
-            fclose(pFile);
+            (void )fclose( pFile);
         }
     }
     return;
