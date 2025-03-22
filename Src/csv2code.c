@@ -24,7 +24,6 @@
 #include <direct.h>
 #include <conio.h>
 #include <malloc.h>
-#include <direct.h>
 
 #include <windows.h>
 

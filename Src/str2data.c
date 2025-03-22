@@ -18,15 +18,13 @@
  *  along with this program.If not, see < https://www.gnu.org/licenses/>.
  */
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <direct.h>
 #include <conio.h>
 #include <malloc.h>
-#include <direct.h>
-
-#include <windows.h>
 
 #include "conv.h"
 #include "str2data.h"

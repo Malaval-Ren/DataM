@@ -18,6 +18,7 @@
  *  along with this program.If not, see < https://www.gnu.org/licenses/>.
  */
 
+#include <windows.h>
 #include <io.h>
 #include <stdio.h>
 #include <conio.h>
@@ -27,8 +28,6 @@
 #include <direct.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#include <windows.h>
 
 #include "main.h"
 

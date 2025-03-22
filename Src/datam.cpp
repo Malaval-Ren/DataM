@@ -866,7 +866,6 @@ int main(int argc, char* argv[])
 
     // Message Information Get the verion and copyright from the file datam.rc
     pAboutString = myBuidAboutString();
-    (void )printf( "\n%s\n\n", pAboutString);
 
     if (argc < 3)
     {
@@ -875,26 +874,36 @@ int main(int argc, char* argv[])
             if ((!strcmp((const char*)argv[1], "-help")) || (!strcmp((const char*)argv[1], "-h")) || (!strcmp((const char*)argv[1], "-?")))
             {
                 usage( pAboutString);
-                if (pAboutString)
-                {
-                    free(pAboutString);
-                }
-                return 0;
             }
+            else if ((!strcmp((const char*)argv[1], "-version")) || (!strcmp((const char*)argv[1], "-v")))
+            {
+                (void )printf( "\n%s\n\n", pAboutString);
+            }
+
+            if (pAboutString)
+            {
+                free(pAboutString);
+            }
+            return 0;
         }
-        usage( pAboutString);
-        (void )printf("\n");
-        if (pAboutString)
+        else
         {
-            free(pAboutString);
+            usage( pAboutString);
+            (void )printf( "\n");
+            if ( pAboutString)
+            {
+                free( pAboutString);
+            }
+            exitOnError( (char *)"not enough parameters", NULL, NULL, 1);
         }
-        exitOnError( (char *)"not enough parameters", NULL, NULL, 1);
     }
     else
     {
+        (void )printf( "\n%s\n\n", pAboutString);
         if (pAboutString)
         {
             free( pAboutString);
+            pAboutString = NULL;
         }
     }
     iCommand = parseArguments( argc, argv, &context);
