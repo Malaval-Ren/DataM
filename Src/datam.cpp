@@ -89,6 +89,7 @@ static void usage( char *pAboutString)
 
     printf( "\n  <option> is one of the following:\n");
     printf( "   +lower       - the output file name is in lower case\n");
+    printf( "   +chkenu      - the path to file with enum eSentence_t\n");
 
     printf( "\n  <filespec> file extension could be:\n");
     printf( "   -dump           : any\n");
@@ -228,6 +229,155 @@ static void pathanmeToLowerCase( char **pPathname)
 }
 
 /**
+* @fn static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BOOL bLowerCase, int iCommand, BOOL bIsAFile)
+* @brief get pathname clean it and store it
+*
+* @param[in]        pInputPathname      pathname of enum, input pathname in utf8, output pathname in binary
+* @param[in,out]    pOutputPathname     handle to cleaned pInputPathname
+* @param[in]        bLowerCase          convert pathname in lower case
+* @param[in]        iCommand            0 for enum file, 1 for input file, 2 for output file
+* @param[in]        bIsAFile            True for a file, False for a folder
+*/
+static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BOOL bLowerCase, int iCommand, BOOL bIsAFile)
+{
+    char    *pDuplicateString = NULL;
+
+    if ((pInputPathname) && (pOutputPathname))
+    {
+        if (!*pOutputPathname)
+        {
+            *pOutputPathname = (char *)calloc( 1, _MAX_PATH + _MAX_PATH);
+            if (!*pOutputPathname)
+            {
+                exitOnError((char *)"Out of memory", NULL, NULL, 1);
+            }
+            else
+            {
+                if (((pInputPathname[0] == '.') && (pInputPathname[1] == '.')) ||
+                    ((pInputPathname[2] != ':') && ((pInputPathname[3] != '/') && (pInputPathname[3] != '\\'))) ||
+                    (((pInputPathname[0] != '/') && (pInputPathname[2] != '/')) || ((pInputPathname[0] != '\\') && (pInputPathname[2] != '\\'))))
+                {
+                    if (_fullpath( *pOutputPathname, pInputPathname, _MAX_PATH) != NULL)
+                    {
+                        if (bIsAFile)
+                        {
+                            if ( ! pathFileExists((const char *)*pOutputPathname))
+                            {
+                                exitOnError((char *)"File does not exist", NULL, pInputPathname, 2);
+                            }
+                        }
+                        else
+                        {
+                            if ( ! directoryExists((const char*)*pOutputPathname))
+                            {
+                                if (pathFileExists((const char*)*pOutputPathname))
+                                {
+                                    exitOnError((char*)"File parameter must be a folder", NULL, *pOutputPathname, 2);
+                                }
+                                else
+                                {
+                                    exitOnError((char*)"File folder does not exist", NULL, *pOutputPathname, 2);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        exitOnError((char *)"Invalid input parameter", NULL, pInputPathname, 2);
+                    }
+                }
+                else
+                {
+                    (void )strncpy( *pOutputPathname, (const char *)pInputPathname, strlen( (const char *)pInputPathname) + (size_t)1);
+                }
+            }
+
+            *pOutputPathname = parseAntiSlashChar(pOutputPathname);
+            if (bIsAFile)
+            {
+                if (pathFileExists( (const char*)*pOutputPathname))
+                {
+                    if (getMyFileSize( *pOutputPathname) == 0)
+                    {
+                        exitOnError( (char *)"Size equal to 0 for file", NULL, *pOutputPathname, 3);
+                    }
+                    else
+                    {
+                        if (bLowerCase)
+                        {
+                            pathanmeToLowerCase( pOutputPathname);
+                        }
+                        else
+                        {
+                            pDuplicateString = strdup( *pOutputPathname);
+                            if (pDuplicateString)
+                            {
+                                pathanmeToLowerCase( pOutputPathname);
+                            }
+                        }
+
+                        if (iCommand)
+                        {
+                            if (!checkFileExtension( *pOutputPathname, iCommand))
+                            {
+                                if (pDuplicateString)
+                                {
+                                    free( *pOutputPathname);
+                                    *pOutputPathname = pDuplicateString;
+                                }
+                            }
+                            else
+                            {
+                                if (pDuplicateString)
+                                {
+                                    free( *pOutputPathname);
+                                    *pOutputPathname = pDuplicateString;
+                                }
+                                exitOnError((char*)"File does not exist", *pOutputPathname, NULL, 2);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    exitOnError((char*)"File does not exist", *pOutputPathname, NULL, 2);
+                }
+            }
+            else
+            {
+                if (*pOutputPathname)
+                {
+                    if ( ! directoryExists( (const char *)*pOutputPathname))
+                    {
+                        // Try to create it
+                        (void )CreateDirectoryA( (const char *)*pOutputPathname, NULL);
+                    }
+
+                    if (directoryExists( (const char *)*pOutputPathname))
+                    {
+                        (void )printf( "\n");
+                        (void )printf( "param output path is : %s\n", *pOutputPathname);
+                    }
+                    else
+                    {
+                        exitOnError( (char *)"output folder does not exist", *pOutputPathname, NULL, 2);
+                        // TODO: try create the output folder
+                    }
+                }
+                else
+                {
+                    exitOnError( (char *)"out of memory", NULL, NULL, 1);
+                }
+            }
+        }
+    }
+    else
+    {
+        exitOnError( (char *)"Bad parameters", NULL, NULL, 1);
+    }
+}
+
+/**
 * @fn static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
 * @brief parse the arguments and check it
 *
@@ -239,47 +389,23 @@ static void pathanmeToLowerCase( char **pPathname)
 */
 static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
 {
-    char           *pConvmParam = NULL;
-    char           *pOptionParam = NULL;
     char           *pDuplicateString = NULL;
     const char     *pEndString = NULL;
     unsigned int    uIndex = 0;
-    int             iCommand = NONE;
+    unsigned int    uLoop = 0;
+    int             iCommand = 0;
     BOOL            bLowerCase = FALSE;
 
-    if (argv[1][0] == '-')  // lower case the convmspec arguments
+    for (uLoop = 1; uLoop < (unsigned int)argc; uLoop++)
     {
-        uIndex = 0;
-        pConvmParam = (char *)calloc( 1, strlen( (char *)(argv[1])) + 2);
-        if (pConvmParam)
+        if ( (argv[uLoop][0] == '-') || (argv[uLoop][0] == '+') )   // lower case the convmspec arguments
         {
-            while (argv[1][uIndex])
+            uIndex = 0;
+            while (argv[uLoop][uIndex])
             {
-                pConvmParam[uIndex] = (char )tolower( argv[1][uIndex]);
+                argv[uLoop][uIndex] = (char )tolower( argv[uLoop][uIndex]);
                 uIndex++;
             }
-        }
-        else
-        {
-            exitOnError( (char *)"out of memory", NULL, NULL, 1);
-        }
-    }
-
-    if (argv[2][0] == '+')  // lower case the option arguments
-    {
-        uIndex = 0;
-        pOptionParam = (char *)calloc( 1, strlen( (char *)(argv[2])) + 2);
-        if (pOptionParam)
-        {
-            while (argv[2][uIndex])
-            {
-                pOptionParam[uIndex] = (char )tolower( argv[2][uIndex]);
-                uIndex++;
-            }
-        }
-        else
-        {
-            exitOnError( (char *)"out of memory", NULL, NULL, 1);
         }
     }
 
@@ -288,199 +414,53 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
      */
     for (uIndex = 1; uIndex < (unsigned int )argc; uIndex++)
     {
-        if ( (pConvmParam) && (*pConvmParam == '-') && (argv[uIndex][0] == '-') )     // convmspec
+        if (argv[uIndex][0] == '-')     // convmspec
         {
-            if (!strcmp( (const char *)pConvmParam, "-dump"))
+            if (!strcmp( (const char *)argv[uIndex], "-dump"))
             {
                 iCommand = DUMP;
             }
-            else if (!strcmp( (const char *)pConvmParam, "-sltb"))    /* strings list to binary file */
+            else if (!strcmp( (const char *)argv[uIndex], "-sltb"))    /* strings list to binary file */
             {
                 iCommand = DATALST;
             }
-            else if (!strcmp( (const char *)pConvmParam, "-ctbl"))    /* strings list to binary file */
+            else if (!strcmp( (const char *)argv[uIndex], "-ctbl"))    /* strings list to binary file */
             {
                 iCommand = CSVTOC;
             }
             else
             {
-                exitOnError( (char *)"illegal convmspec parameter", pConvmParam, NULL, 2);
+                exitOnError( (char *)"Illegal convmspec parameter", argv[uIndex], NULL, 2);
             }
         }
-        else if ( (pOptionParam) && (*pOptionParam == '+') && (argv[uIndex][0] == '+') )  // option
+        else if (argv[uIndex][0] == '+')    // option, check
         {
-            if (!strcmp( (const char *)pOptionParam, "+lower"))
+            if ( !strcmp( (const char *)argv[uIndex], "+lower"))
             {
                 bLowerCase = TRUE;
             }
+            else if ( !strcmp( (const char *)argv[uIndex], "+chkenu"))
+            {
+                if (!pContext->pCheckEnumPathname)
+                {
+                    uIndex++;
+                    getPathnameFromCmd( argv[uIndex], &pContext->pCheckEnumPathname, bLowerCase, 0, TRUE);
+                }
+            }
             else
             {
-                if (pConvmParam)
-                {
-                    free( pConvmParam);
-                }
-
-                exitOnError( (char *)"illegal option parameter", pOptionParam, NULL, 2);
+                exitOnError( (char *)"Illegal option parameter", argv[uIndex], NULL, 2);
             }
         }
         else
         {
-            if ( ! pContext->pFullFilename)
+            if (!pContext->pFullFilename)
             {
-                pContext->pFullFilename = (char *)calloc( 1, _MAX_PATH + _MAX_PATH);
-                if ( ! pContext->pFullFilename)
-                {
-                    exitOnError( (char *)"out of memory", NULL, NULL, 1);
-                }
-                else
-                {
-                    if ( ((argv[uIndex][0] == '.') && (argv[uIndex][1] == '.')) ||
-                        ((argv[uIndex][2] != ':') && ( (argv[uIndex][3] != '/') && (argv[uIndex][3] != '\\')) ) ||
-                        (((argv[uIndex][0] != '/') && (argv[uIndex][2] != '/')) || ((argv[uIndex][0] != '\\') && (argv[uIndex][2] != '\\'))) )
-                    {
-                        if (_fullpath( pContext->pFullFilename, argv[uIndex], _MAX_PATH) != NULL)
-                        {
-                            if ( ! pathFileExists( (const char *)pContext->pFullFilename))
-                            {
-                                exitOnError( (char *)"input file does not exist", NULL, argv[uIndex], 2);
-                            }
-                        }
-                        else
-                        {
-                            exitOnError( (char *)"invalid input parameter", NULL, argv[uIndex], 2);
-                        }
-                    }
-                    else
-                    {
-                        (void )strncpy( pContext->pFullFilename, (const char *)argv[uIndex], strlen( (const char *)argv[uIndex]) + (size_t)1);
-                    }
-                }
-
-                pContext->pFullFilename = parseAntiSlashChar( &pContext->pFullFilename);
-                if (pathFileExists( (const char*)pContext->pFullFilename))
-                {
-                    if (getMyFileSize( pContext->pFullFilename) == 0)
-                    {
-                        exitOnError( (char *)"size equal to 0 for file", NULL, pContext->pFullFilename, 3);
-                    }
-                    else
-                    {
-                        if (bLowerCase)
-                        {
-                            pathanmeToLowerCase( &pContext->pFullFilename);
-                        }
-                        else
-                        {
-                            pDuplicateString = strdup( pContext->pFullFilename);
-                            if (pDuplicateString)
-                            {
-                                pathanmeToLowerCase( &pContext->pFullFilename);
-                            }
-                        }
-
-                        if (!checkFileExtension( pContext->pFullFilename, iCommand))
-                        {
-                            if (pDuplicateString)
-                            {
-                                free(pContext->pFullFilename);
-                                pContext->pFullFilename = pDuplicateString;
-                            }
-                            pEndString = NULL;
-                        }
-                        else
-                        {
-                            if (pDuplicateString)
-                            {
-                                free(pContext->pFullFilename);
-                                pContext->pFullFilename = pDuplicateString;
-                            }
-                            exitOnError( (char *)"input file does not exist", pContext->pFullFilename, NULL, 2);
-                        }
-                    }
-                }
-                else
-                {
-                    exitOnError( (char *)"input file does not exist", pContext->pFullFilename, NULL, 2);
-                }
-
+                getPathnameFromCmd( argv[uIndex], &pContext->pFullFilename, bLowerCase, iCommand, TRUE);
             }
             else if (!pContext->pOutputPathname)
             {
-                pContext->pOutputPathname = (char *)calloc( 1, _MAX_PATH + _MAX_PATH);
-                if (!pContext->pOutputPathname)
-                {
-                    if (pContext->pFullFilename)
-                    {
-                        free( pContext->pFullFilename);
-                        pContext->pFullFilename = NULL;
-                    }
-                    exitOnError( (char *)"out of memory", NULL, NULL, 1);
-                }
-                else
-                {
-                    if (((argv[uIndex][0] == '.') && (argv[uIndex][1] == '.')) ||
-                        ((argv[uIndex][2] != ':') && ((argv[uIndex][3] != '/') && (argv[uIndex][3] != '\\'))) ||
-                        (((argv[uIndex][0] != '/') && (argv[uIndex][2] != '/')) || ((argv[uIndex][0] != '\\') && (argv[uIndex][2] != '\\'))))
-                    {
-                        if (_fullpath( pContext->pOutputPathname, argv[uIndex], _MAX_PATH) != NULL)
-                        {
-                            if ( ! directoryExists( (const char *)pContext->pOutputPathname))
-                            {
-                                if (pathFileExists( (const char *)pContext->pOutputPathname))
-                                {
-                                    exitOnError( (char *)"output parameter must be a folder", NULL, argv[uIndex], 2);
-                                }
-                                else
-                                {
-                                    exitOnError( (char *)"output folder does not exist", NULL, argv[uIndex], 2);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            exitOnError( (char *)"invalid output parameter", NULL, argv[uIndex], 2);
-                        }
-                    }
-                    else
-                    {
-                        (void )strncpy( pContext->pOutputPathname, (const char *)argv[uIndex], strlen( (const char *)argv[uIndex]) + (size_t)1);
-                    }
-                }
-
-                pContext->pOutputPathname = parseAntiSlashChar( &pContext->pOutputPathname);
-                if (pContext->pOutputPathname)
-                {
-                    if ( ! directoryExists( (const char *)pContext->pOutputPathname))
-                    {
-                        // Try to create it
-                        (void )CreateDirectoryA( (const char *)pContext->pOutputPathname, NULL);
-                    }
-
-                    if (directoryExists( (const char *)pContext->pOutputPathname))
-                    {
-                        (void )printf( "\n");
-                        (void )printf( "param output path is : %s\n", pContext->pOutputPathname);
-                    }
-                    else
-                    {
-                        if (pContext->pOutputPathname)
-                        {
-                            free( pContext->pOutputPathname);
-                            pContext->pOutputPathname = NULL;
-                        }
-                        if (pContext->pFullFilename)
-                        {
-                            free( pContext->pFullFilename);
-                            pContext->pFullFilename = NULL;
-                        }
-                        exitOnError( (char *)"output folder does not exist", pContext->pOutputPathname, NULL, 2);
-                        // TODO: try create the output folder
-                    }
-                }
-                else
-                {
-                    exitOnError( (char *)"out of memory", NULL, NULL, 1);
-                }
+                getPathnameFromCmd( argv[uIndex], &pContext->pOutputPathname, bLowerCase, iCommand, FALSE);
             }
             else
             {
@@ -489,19 +469,7 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
         }
     }
 
-    if (pConvmParam)
-    {
-        free( pConvmParam);
-        pConvmParam = NULL;
-    }
-
-    if (pOptionParam)
-    {
-        free( pOptionParam);
-        pConvmParam = NULL;
-    }
-
-    if (iCommand == NONE)
+    if ((iCommand == NONE) || ((pContext->pFullFilename == NULL) || (pContext->pOutputPathname == NULL)) )
     {
         if (pContext->pFullFilename)
         {
@@ -513,7 +481,19 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
             free( pContext->pOutputPathname);
             pContext->pOutputPathname = NULL;
         }
-        exitOnError( (char *)"parameters not understood", NULL, NULL, 1);
+        if (pContext->pCheckEnumPathname)
+        {
+            free(pContext->pCheckEnumPathname);
+            pContext->pCheckEnumPathname = NULL;
+        }
+        if (iCommand == NONE)
+        {
+            exitOnError((char*)"Parameters not understood", NULL, NULL, 1);
+        }
+        else
+        {
+            exitOnError((char*)"Missing parameters", NULL, NULL, 1);
+        }
     }
 
     return iCommand;
@@ -852,11 +832,11 @@ static char *myBuidAboutString( void)
 int main(int argc, char* argv[])
 {
     ConvmArguments      context = { NULL, NULL, 0 };
-    char* pfullOutputFilename = NULL;
-    char* pInputFileData = NULL;
-    char* pOutputFileData = NULL;
-    const char* pEndString = NULL;
-    char* pAboutString = NULL;
+    char               *pfullOutputFilename = NULL;
+    char               *pInputFileData = NULL;
+    char               *pOutputFileData = NULL;
+    const char         *pEndString = NULL;
+    char               *pAboutString = NULL;
     int                 iCommand = NONE;
     unsigned int        uInputFileSize = 0;
     unsigned short int  uDataSize = 0;
@@ -897,15 +877,14 @@ int main(int argc, char* argv[])
             exitOnError( (char *)"not enough parameters", NULL, NULL, 1);
         }
     }
-    else
+
+    (void )printf( "\n%s\n\n", pAboutString);
+    if (pAboutString)
     {
-        (void )printf( "\n%s\n\n", pAboutString);
-        if (pAboutString)
-        {
-            free( pAboutString);
-            pAboutString = NULL;
-        }
+        free( pAboutString);
+        pAboutString = NULL;
     }
+
     iCommand = parseArguments( argc, argv, &context);
 
     /*
@@ -974,13 +953,29 @@ int main(int argc, char* argv[])
                     if (uResultDataSize <= uDataSize)
                     {
                         // display a string from the file for debug
-                        // (void )mysentence( pOutputFileData, 19);
-                        // (void )mysentence( pOutputFileData, 39);
-                        // (void )mysentence( pOutputFileData, 49);
+                        // (void )mySentence( pOutputFileData, 19);
+                        // (void )mySentence( pOutputFileData, 39);
+                        // (void )mySentence( pOutputFileData, 49);
 
                         pfullOutputFilename = createOutputPathname( context.pFullFilename, context.pOutputPathname, iCommand);
                         if (pfullOutputFilename)
                         {
+                            if (context.pCheckEnumPathname)
+                            {
+                                unsigned int uOjectIndex = myComputeIndexOf( context.pCheckEnumPathname, (char *)"eObjects,");
+                                if (uOjectIndex == 0)
+                                {
+                                    exitOnError( (char *)"enum file is empty", NULL, context.pCheckEnumPathname, 1);
+                                }
+                                else
+                                {
+                                    if (strcmp( mySentence( pOutputFileData, (unsigned short)uOjectIndex), "Objets") != 0)
+                                    {
+                                        exitOnError( (char *)"Synchro between enum and string table is BAD", NULL, pfullOutputFilename, 5);
+                                    }
+                                }
+                            }
+
                             if (writeFileFromMemory( pfullOutputFilename, pOutputFileData, uResultDataSize))
                             {
                                 exitOnError( (char *)"failed to write output file", NULL, pfullOutputFilename, 4);
@@ -1004,12 +999,13 @@ int main(int argc, char* argv[])
             pInputFileData = readFileToMemory( context.pFullFilename);   // input file is in memory
             if ( (pInputFileData) && (uInputFileSize > 100) )
             {
-
+                exitOnError( (char *)"Not implemented", NULL, NULL, 6);
             }
         }
         else if (iCommand == DUMP)
         {
-            ;
+            (void )printf( "\n");
+            exitOnError( (char *)"Not implemented", NULL, NULL, 6);
         }
         else
         {

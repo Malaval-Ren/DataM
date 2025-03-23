@@ -8,9 +8,11 @@ extern "C" {
 
     void findNumLinesLst( char *pinputFile, unsigned short int *puNumLines, unsigned short int *puDataSize);
 
-    char *mysentence( char *pOutputFileData, unsigned short int uNumber);
+    char *mySentence( char *pOutputFileData, unsigned short int uNumber);
 
     unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines, char *pOutputFileData, unsigned short int uDataSize);
+
+    unsigned int myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName);
 
 #ifdef __cplusplus
 }

@@ -77,7 +77,7 @@ void findNumLinesLst( char *pInputFile, unsigned short int *puNumLines, unsigned
 }
 
 /**
- * @fn char *mysentence( pTheGameStruct pGameContext, unsigned short int uNumber)
+ * @fn char *mySentence( pTheGameStruct pGameContext, unsigned short int uNumber)
  * 
  * @brief debug function to test the conversion
  * 
@@ -86,9 +86,8 @@ void findNumLinesLst( char *pInputFile, unsigned short int *puNumLines, unsigned
  *
  * @return char * pointer to the string
  */
-char *mysentence( char *pOutputFileData, unsigned short int uNumber)
+char *mySentence( char *pOutputFileData, unsigned short int uNumber)
 {
-
     short int           *pDataPic;
     char                *pDataStr = NULL;
     unsigned short int   uMaxPic;
@@ -105,7 +104,7 @@ char *mysentence( char *pOutputFileData, unsigned short int uNumber)
             pDataStr += ((uMaxPic * sizeof( short int)) + (unsigned short int )pDataPic[uNumber]);
         }
     }
-    (void )printf( " result : %u : %s\n", uNumber, pDataStr);
+    // (void )printf( " result : %u : %s\n", uNumber, pDataStr);
 
     return pDataStr;
 }
@@ -239,7 +238,6 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
 
 /**
  * @fn void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsigned short int *puDataSize)
- *
  * @brief
  *
  * @param[in]       pInputFile :
@@ -287,4 +285,83 @@ void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsig
         }
     }
     return;
+}
+
+/**
+* @fn unsigned int myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName)
+* @brief parse a text file to found eSentence_t and index of element eObjects
+* 
+* @param[in]       pCheckEnumPathname :
+* @param[in]       pEnumElementName :
+* 
+ * @return 0 is error or index of eObjects
+*/
+unsigned int myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName)
+{
+    FILE            *pFichier;
+    char            *pFound;
+    char             buffer[256];
+    unsigned int     uLigne = 0;
+    unsigned int     uCompteur = 0;
+    unsigned int     uIndex;
+    unsigned int     uIndexObjects = 0;
+
+    pFichier = fopen( pCheckEnumPathname, "r");
+    if (pFichier == NULL)
+    {
+        (void )printf( "Erreur : Can't open file %s\n", pCheckEnumPathname);
+        return uIndexObjects;
+    }
+
+    // find the begin of enum eSentence_t
+    while (fgets( buffer, sizeof( buffer), pFichier) != NULL)
+    {
+        pFound = strstr( buffer, "eSentence_t");
+        if (pFound != NULL)
+        {
+            //(void )printf( "The string has been found in line : %s", buffer);
+            break;
+        }
+    }
+    // jump to the declaration of the enum eSentence_t
+    (void )fgets( buffer, sizeof( buffer), pFichier);
+    (void )fgets( buffer, sizeof( buffer), pFichier);
+    (void )fgets( buffer, sizeof( buffer), pFichier);
+    pFound = strstr( buffer, "typedef enum {");
+    if (pFound == NULL)
+    {
+        (void )printf( "Erreur : The begin of eSentence_t declaration not found");
+        return uIndexObjects;
+    }
+
+    // parse the enum eSentence_t
+    while (fgets( buffer, sizeof( buffer), pFichier) != NULL)
+    {
+        uLigne++;
+        pFound = strstr(buffer, "} eSentence_t;");
+        if (pFound != NULL)
+        {
+            break;
+        }
+        
+        pFound = strstr( buffer, pEnumElementName);
+        if (pFound != NULL)
+        {
+            uIndexObjects = uCompteur - 1;
+            break;
+        }
+
+        for (uIndex = 0; uIndex < strlen( buffer); uIndex++)
+        {
+            if (buffer[uIndex] == ',')
+            {
+                uCompteur++;
+            }
+        }
+    }
+
+    (void )fclose( pFichier);
+    //(void )printf( "The index of 'eObjects' is equal at %u. Parsed %u line.\n", uIndexObjects, uLigne);
+
+    return uIndexObjects;
 }

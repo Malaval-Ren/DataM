@@ -21,6 +21,7 @@ typedef struct
 {
     char           *pFullFilename;
     char           *pOutputPathname;
+    char           *pCheckEnumPathname;
     int             iTabColumns;
 } ConvmArguments;
 
