@@ -1,6 +1,7 @@
 #define IDS_APP_TITLE           103
 
 #define IDR_MAINFRAME           128
+#define IDI_APP_ICON            101
 #define IDD_DATAM_DIALOG        102
 #define IDD_ABOUTBOX            103
 #define IDM_ABOUT               104
