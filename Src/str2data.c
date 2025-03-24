@@ -33,7 +33,7 @@
 #pragma warning(disable : 4996)
 
 /**
- * @fn void findNumLinesLst( char *pInputFile, unsigned short int *pInputFile, unsigned short int *puDataSize)
+ * @fn void findNumLinesLst( char *pInputFile, unsigned short *pInputFile, unsigned short *puDataSize)
  *
  * @brief
  *
@@ -41,11 +41,11 @@
  * @param[in,out]   pInputFile :
  * @param[in,out]   puDataSize :
  */
-void findNumLinesLst( char *pInputFile, unsigned short int *puNumLines, unsigned short int *puDataSize)
+void findNumLinesLst( char *pInputFile, unsigned short *puNumLines, unsigned short *puDataSize)
 {
     FILE                   *pFile = NULL;
     char                    line[512] = {0};
-    unsigned short int      uLineSize = 0;
+    unsigned short          uLineSize;
 
     if ( (pInputFile) && (puNumLines) && (puDataSize) )
     {
@@ -64,20 +64,19 @@ void findNumLinesLst( char *pInputFile, unsigned short int *puNumLines, unsigned
                     if (line[uLineSize - 1] == '\n')
                     {
                         // (void )printf( "#%02d : %d : %s", *puNumLines, *puDataSize, line);
-                        //uLineSize -= 1;
                         *puDataSize += uLineSize;
                     }
                 }
             }
 
-            fclose( pFile);
+            (void )fclose( pFile);
         }
     }
     return;
 }
 
 /**
- * @fn char *mySentence( pTheGameStruct pGameContext, unsigned short int uNumber)
+ * @fn char *mySentence( pTheGameStruct pGameContext, unsigned short uNumber)
  * 
  * @brief debug function to test the conversion
  * 
@@ -86,11 +85,11 @@ void findNumLinesLst( char *pInputFile, unsigned short int *puNumLines, unsigned
  *
  * @return char * pointer to the string
  */
-char *mySentence( char *pOutputFileData, unsigned short int uNumber)
+char *mySentence( char *pOutputFileData, unsigned short uNumber)
 {
     short int           *pDataPic;
     char                *pDataStr = NULL;
-    unsigned short int   uMaxPic;
+    unsigned short       uMaxPic;
 
     if (pOutputFileData)
     {
@@ -110,7 +109,7 @@ char *mySentence( char *pOutputFileData, unsigned short int uNumber)
 }
 
 /**
- * @fn unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines, char *pOutputFileData, unsigned short int uDataSize)
+ * @fn unsigned short str2data( char *pInputFileName, unsigned short uNumLines, char *pOutputFileData, unsigned short uDataSize)
  *
  * @brief 
  *
@@ -121,19 +120,17 @@ char *mySentence( char *pOutputFileData, unsigned short int uNumber)
  *
  * @return char * pointer to the string
  */
-unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines, char *pOutputFileData, unsigned short int uDataSize)
+unsigned short str2data( char *pInputFileName, unsigned short uNumLines, char *pOutputFileData, unsigned short uDataSize)
 {
     FILE               *pFile = NULL;
     char               *pRunning = NULL;
-    char               *pRunStr = NULL;
-    unsigned short int *puTable;
+    unsigned short     *puTable;
     char                line[512] = {0};
-    unsigned short int  uLineSize = 0;
-    unsigned short int  uOffset = 0;
-    unsigned short int  uLoop;
-    unsigned short int  uNumberOfCharRemoved;
-    unsigned short int  uOutputDataSize = 0;
-    //unsigned short int  uIndex = 0;
+    unsigned short      uLineSize;
+    unsigned short      uOffset = 0;
+    unsigned short      uLoop;
+    unsigned short      uNumberOfCharRemoved;
+    unsigned short      uOutputDataSize = 0;
 
     if ( (pInputFileName) && (pOutputFileData) && (uNumLines) && (uDataSize) )
     {
@@ -162,7 +159,6 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
 
                             if ( (line[uLineSize - 1] == '\n') && (line[uLineSize - 2] == '\r') )
                             {
-                                pRunStr = pRunning;
                                 line[uLineSize - 1] = '\0';
                                 line[uLineSize - 2] = '\0';
                                 uLineSize--;
@@ -191,15 +187,6 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
                                     }
                                     pRunning++;
                                 }
-
-                                //if (*(unsigned int *)pRunning == 0xFdFdFdFd)
-                                //{
-                                //    (void )printf( "Out of memory : 'pOutputFileData' buffer is too small\n");
-                                //    uOutputDataSize = 0;
-                                //    break;
-                                //}
-                                //(void )printf( "a line %03u: len= %04u - %s\t%d\n", uIndex, (unsigned int)strlen( pRunStr) + 1, pRunStr, uOffset);
-                                //uIndex++;
 
                                 *puTable = uOffset;
                                 puTable++;
@@ -237,18 +224,18 @@ unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines,
 }
 
 /**
- * @fn void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsigned short int *puDataSize)
+ * @fn static void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsigned short int *puDataSize)
  * @brief
  *
  * @param[in]       pInputFile :
  * @param[in,out]   puNumLines :
  * @param[in,out]   puDataSize :
  */
-void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsigned short int *puDataSize)
+static void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsigned short int *puDataSize)
 {
     FILE               *pFile = NULL;
     char                line[512] = {0};
-    unsigned short int  uLineSize = 0;
+    unsigned short int  uLineSize;
 
     *puNumLines = 0;
     *puDataSize = 0;
@@ -267,7 +254,7 @@ void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsig
 
                     if ( ( (pPosition) && (pr_position) ) && (pr_position > pPosition) )
                     {
-                        uLineSize = (unsigned short int )(pr_position - pPosition);
+                        // uLineSize = (unsigned short int )(pr_position - pPosition);
 
                         *puNumLines += 1;
                         uLineSize = (unsigned short )strlen( line);
@@ -284,11 +271,10 @@ void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsig
             (void )fclose( pFile);
         }
     }
-    return;
 }
 
 /**
-* @fn unsigned int myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName)
+* @fn unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName)
 * @brief parse a text file to found eSentence_t and index of element eObjects
 * 
 * @param[in]       pCheckEnumPathname :
@@ -296,15 +282,15 @@ void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines, unsig
 * 
  * @return 0 is error or index of eObjects
 */
-unsigned int myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName)
+unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName)
 {
     FILE            *pFichier;
     char            *pFound;
     char             buffer[256];
     unsigned int     uLigne = 0;
-    unsigned int     uCompteur = 0;
     unsigned int     uIndex;
-    unsigned int     uIndexObjects = 0;
+    unsigned short   uCompteur = 0;
+    unsigned short   uIndexObjects = 0;
 
     pFichier = fopen( pCheckEnumPathname, "r");
     if (pFichier == NULL)

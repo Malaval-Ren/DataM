@@ -46,8 +46,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="datam.res">
+    <ResourceCompile Include="datam.rc">
       <Filter>Fichiers de ressources</Filter>
-    </Resource>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ReadMe.md" />
+    <None Include="..\gpl-3.0_us.md" />
   </ItemGroup>
 </Project>

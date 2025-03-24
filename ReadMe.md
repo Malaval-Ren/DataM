@@ -7,30 +7,60 @@
 
 Just a little software to help **Apple IIGS** cross dev
 
-## help usage :
+## License
+
+This software is under the **GPLv3** license
+
+## Help usage
 
 ```bash
+datam.exe v1.10.11.25, Copyright (c) 2022-2025 R. Malaval & F. Mure
 
-datam.exe v1.8.11.21, Copyright (c) 2022-2025 R. Malaval & F. Mure
+Usage: datam <option> "<filespec>" <convmspec> "<number>" "<filespec>" "<output folder>"
 
-Usage: datam <convmspec> <option> "<filespec>" "<output folder>"
+  <option> is one of the following
+   +lower       - the output file name is in lower case
+   +chkenu      - Check synchro enum eSentence_t and list of string
+                  <filespec> the path to file with enum eSentence_t definition
 
-  <convmspec> is one of the following:
+  <convmspec> is one of the following
    -dump        - dump content of a supported file format
    -sltb        - file with strings list to binary file
    -ctbl        - create table from .cvs to .c
+   -getstr      - get string at index in binary file
 
-  <option> is one of the following:
-   +lower       - the output file name is in lower case
+  <filespec> file extension could be :
+   -dump          'any'
 
-  <filespec> file extension could be:
-   -dump           : any
+  <filespec> :
+   -sltb          'pathname to txt file'
+  <output folder> :
+   -sltb          'pathname to folder destination'
 
+  <number> could be:
+   -getstr        '0 .. 999'
+  <filespec> :
+   -getstr        'pathname to bin file'
 ```
 
-note: character '…' is converted to character '/' to be compliant with the picture where the char '/' is a '…'
+## Sample usage
 
-## Special thank's to :
+```bash
+datam -v
+datam -?
+
+datam +LOwer +chkEnu pathname.h -SLTB datatext.fr.txt ..\dessin\
+datam +chkenu pathname.h -sltb datatext.fr.txt ..\dessin\
+datam -sltb datatext.fr.txt ..\dessin\
+
+datam -getstr 400 datatext.fr.bin
+datam -getstr 400 datatext.en.bin
+```
+
+>note:
+>character '…' is converted to character '/' to be compliant with the picture where the char '/' is a '…'
+
+## Special thank's to
 
 co worker - **Frédéric Mure**
 
@@ -42,5 +72,8 @@ co worker - **Frédéric Mure**
 
 [GoldenGate](https://goldengate.gitlab.io/) - Kelvin W Sherlock
 
+## Owner
+
+**Renaud Malaval** renaud.malaval@free.fr
 
 Have Fun :exclamation:

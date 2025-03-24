@@ -159,6 +159,10 @@
   <ItemGroup>
     <ResourceCompile Include="datam.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\gpl-3.0_us.md" />
+    <None Include="..\ReadMe.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -39,7 +39,7 @@
 #pragma warning(disable : 4996)
 
 /*
- * where to found the wnidows error code :
+ * where to found the windows error code :
  * https://docs.microsoft.com/fr-fr/windows/win32/debug/system-error-codes--0-499-
  */
 
@@ -63,48 +63,66 @@
 
 /*
  * complement ligne de iCommand pour debug :
- * -dblf ../../textes.cc
- *
- * -rled ../../AUBERGIS.shr
+ * -sltb
+ * +LOwer +chkEnu ..\..\..\Iron_Lord\main\pathname.h -SLTB ..\..\..\Iron_Lord\main\datatext.fr.txt ..\..\..\Iron_Lord\dessin\
+ * +chkenu ..\..\..\Iron_Lord\main\pathname.h -sltb ..\..\..\Iron_Lord\main\datatext.fr.txt ..\..\..\Iron_Lord\dessin\
+ * +chkenu ..\..\..\Iron_Lord\main\pathname.h -sltb ..\..\..\Iron_Lord\main\datatext.fr.txt ..\..\..\Iron_Lord\dessin\
+ * 
+ * -getstr
+ * -getstr 400 ..\..\..\Iron_Lord\dessin\datatext.fr.bin
+ * -getstr 400 ..\..\..\Iron_Lord\dessin\datatext.en.bin
  */
 
 
 /*
- * @fn static void usage( char *pAboutString)
+ * @fn static void datam_usage( char *pAboutString)
  * @brief Show how to use soft
  *
  * @param[in]        pAboutString
  */
-static void usage( char *pAboutString)
+static void datam_usage( char *pAboutString)
 {
     if (pAboutString)
     {
         printf("\n%s\n\n", pAboutString);
     }
-    printf( "Usage: datam <convmspec> <option> \"<filespec>\" \"<output folder>\"\n");
-    printf( "\n  <convmspec> is one of the following:\n");
+    printf( "Usage: datam <option> \"<filespec>\" <convmspec> \"<number>\" \"<filespec>\" \"<output folder>\"\n");
+
+    printf( "\n  <option> is one of the following\n");
+    printf( "   +lower       - the output file name is in lower case\n");
+    printf( "   +chkenu      - Check synchro enum eSentence_t and list of string\n");
+    printf( "                  <filespec> the path to file with enum eSentence_t definition\n");
+
+    printf( "\n  <convmspec> is one of the following\n");
     printf( "   -dump        - dump content of a supported file format\n");
     printf( "   -sltb        - file with strings list to binary file\n");
     printf( "   -ctbl        - create table from .cvs to .c\n");
+    printf( "   -getstr      - get string at index in binary file\n");
 
-    printf( "\n  <option> is one of the following:\n");
-    printf( "   +lower       - the output file name is in lower case\n");
-    printf( "   +chkenu      - the path to file with enum eSentence_t\n");
+    printf( "\n  <filespec> file extension could be :\n");
+    printf( "   -dump          'any'\n");
 
-    printf( "\n  <filespec> file extension could be:\n");
-    printf( "   -dump           : any\n");
+    printf( "\n  <filespec> :\n");
+    printf( "   -sltb          'pathname to txt file'\n");
+    printf( "  <output folder> :\n");
+    printf( "   -sltb          'pathname to folder destination'\n");
+
+    printf( "\n  <number> could be:\n");
+    printf( "   -getstr        '0 .. 999'\n");
+    printf( "  <filespec> :\n");
+    printf( "   -getstr        'pathname to bin file'\n");
 }
 
 /**
-* @fn static int checkFileExtension( char *pPathFilename, int iCommand)
+* @fn static int checkFileExtension( char *pPathFilename, eCommand_t eCommand)
 * @brief Check the 4 last char of file name to be .scr, .shr, .pnt, .pic
 *
 * @param[in]        pPathFilename
-* @param[in]        iCommand
+* @param[in]        eCommand
 *
 * @return 0 if ok, or 3 on error but never return the software exit
 */
-static int checkFileExtension( char *pPathFilename, int iCommand)
+static int checkFileExtension( char *pPathFilename, eCommand_t eCommand)
 {
     const char  *pEndString = NULL;
     char        *pRunning = NULL;
@@ -114,9 +132,9 @@ static int checkFileExtension( char *pPathFilename, int iCommand)
     BOOL         bError = FALSE;
     BOOL         bErrorCmd = FALSE;
     BOOL         bErrorExt = FALSE;
-    const char  *pCmdtext[] = { "none", "-dump", "-sltb", "-ctbl" };
+    const char  *pCmdtext[] = { "none", "-dump", "-sltb", "-ctbl", "-getstr"};
 
-    if (iCommand == DUMP)
+    if (eCommand == eDUMP)
     {
         iError = 0;
     }
@@ -145,19 +163,30 @@ static int checkFileExtension( char *pPathFilename, int iCommand)
                 }
                 else if (strlen( pLastPointChar) == 3)
                 {
-                    if (iCommand == DATALST)
+                    if (eCommand == eDATALST)
                     {
                         if (strcmp( (const char *)pLastPointChar, "txt"))
                         {
                             bError = TRUE;
                         }
                     }
-                    else if (iCommand == CSVTOC)
+                    else if (eCommand == eCSVTOC)
                     {
                         if (strcmp( (const char *)pLastPointChar, "csv"))
                         {
                             bError = TRUE;
                         }
+                    }
+                    else if (eCommand == eGETSTR)
+                    {
+                        if (strcmp( (const char*)pLastPointChar, "bin"))
+                        {
+                            bError = TRUE;
+                        }
+                    }
+                    else
+                    {
+                        bError = TRUE;
                     }
                 }
                 else
@@ -167,19 +196,19 @@ static int checkFileExtension( char *pPathFilename, int iCommand)
 
                 if (bError)
                 {
-                    exitOnError( (char *)"file extension not supported", (char *)pCmdtext[iCommand], (char *)pEndString, 3);
+                    exitOnError( (char *)"file extension not supported", (char *)pCmdtext[eCommand], (char *)pEndString, 3);
                     iError = 1;
                 }
 
                 if (bErrorCmd)
                 {
-                    exitOnError( (char *)"command already done on this file", (char *)pCmdtext[iCommand], (char *)pEndString, 3);
+                    exitOnError( (char *)"command already done on this file", (char *)pCmdtext[eCommand], (char *)pEndString, 3);
                     iError = 1;
                 }
 
                 if (bErrorExt)
                 {
-                    exitOnError( (char *)"file not compatible with command", (char *)pCmdtext[iCommand], (char *)pEndString, 5);
+                    exitOnError( (char *)"file not compatible with command", (char *)pCmdtext[eCommand], (char *)pEndString, 5);
                     iError = 1;
                 }
             }
@@ -229,16 +258,16 @@ static void pathanmeToLowerCase( char **pPathname)
 }
 
 /**
-* @fn static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BOOL bLowerCase, int iCommand, BOOL bIsAFile)
+* @fn static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BOOL bLowerCase, eCommand_t eCommand, BOOL bIsAFile)
 * @brief get pathname clean it and store it
 *
 * @param[in]        pInputPathname      pathname of enum, input pathname in utf8, output pathname in binary
 * @param[in,out]    pOutputPathname     handle to cleaned pInputPathname
 * @param[in]        bLowerCase          convert pathname in lower case
-* @param[in]        iCommand            0 for enum file, 1 for input file, 2 for output file
+* @param[in]        eCommand            num of command
 * @param[in]        bIsAFile            True for a file, False for a folder
 */
-static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BOOL bLowerCase, int iCommand, BOOL bIsAFile)
+static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BOOL bLowerCase, eCommand_t eCommand, BOOL bIsAFile)
 {
     char    *pDuplicateString = NULL;
 
@@ -295,7 +324,7 @@ static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BO
             *pOutputPathname = parseAntiSlashChar(pOutputPathname);
             if (bIsAFile)
             {
-                if (pathFileExists( (const char*)*pOutputPathname))
+                if (pathFileExists( (const char *)*pOutputPathname))
                 {
                     if (getMyFileSize( *pOutputPathname) == 0)
                     {
@@ -316,9 +345,9 @@ static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BO
                             }
                         }
 
-                        if (iCommand)
+                        if (eCommand)
                         {
-                            if (!checkFileExtension( *pOutputPathname, iCommand))
+                            if (!checkFileExtension( *pOutputPathname, eCommand))
                             {
                                 if (pDuplicateString)
                                 {
@@ -378,7 +407,7 @@ static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BO
 }
 
 /**
-* @fn static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
+* @fn static eCommand_t parseArguments( int argc, char *argv[], ConvmArguments *pContext)
 * @brief parse the arguments and check it
 *
 * @param[in]        argc
@@ -387,13 +416,11 @@ static void getPathnameFromCmd( char *pInputPathname, char **pOutputPathname, BO
 *
 * @return the convmspec value and filled pContext structure, on error the software exit
 */
-static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
+static eCommand_t parseArguments( int argc, char *argv[], ConvmArguments *pContext)
 {
-    char           *pDuplicateString = NULL;
-    const char     *pEndString = NULL;
     unsigned int    uIndex = 0;
     unsigned int    uLoop = 0;
-    int             iCommand = 0;
+    eCommand_t      eCommand = eEMPTY;
     BOOL            bLowerCase = FALSE;
 
     for (uLoop = 1; uLoop < (unsigned int)argc; uLoop++)
@@ -418,15 +445,21 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
         {
             if (!strcmp( (const char *)argv[uIndex], "-dump"))
             {
-                iCommand = DUMP;
+                eCommand = eDUMP;
             }
             else if (!strcmp( (const char *)argv[uIndex], "-sltb"))    /* strings list to binary file */
             {
-                iCommand = DATALST;
+                eCommand = eDATALST;
             }
             else if (!strcmp( (const char *)argv[uIndex], "-ctbl"))    /* strings list to binary file */
             {
-                iCommand = CSVTOC;
+                eCommand = eCSVTOC;
+            }
+            else if (!strcmp((const char *)argv[uIndex], "-getstr"))    /* strings list to binary file */
+            {
+                eCommand = eGETSTR;
+                uIndex++;
+                pContext->iTabColumns = atoi(argv[uIndex]);
             }
             else
             {
@@ -444,7 +477,7 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
                 if (!pContext->pCheckEnumPathname)
                 {
                     uIndex++;
-                    getPathnameFromCmd( argv[uIndex], &pContext->pCheckEnumPathname, bLowerCase, 0, TRUE);
+                    getPathnameFromCmd( argv[uIndex], &pContext->pCheckEnumPathname, bLowerCase, eEMPTY, TRUE);
                 }
             }
             else
@@ -456,11 +489,11 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
         {
             if (!pContext->pFullFilename)
             {
-                getPathnameFromCmd( argv[uIndex], &pContext->pFullFilename, bLowerCase, iCommand, TRUE);
+                getPathnameFromCmd( argv[uIndex], &pContext->pFullFilename, bLowerCase, eCommand, TRUE);
             }
-            else if (!pContext->pOutputPathname)
+            else if ( (!pContext->pOutputPathname) && (eCommand != eGETSTR) )
             {
-                getPathnameFromCmd( argv[uIndex], &pContext->pOutputPathname, bLowerCase, iCommand, FALSE);
+                getPathnameFromCmd( argv[uIndex], &pContext->pOutputPathname, bLowerCase, eCommand, FALSE);
             }
             else
             {
@@ -469,7 +502,9 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
         }
     }
 
-    if ((iCommand == NONE) || ((pContext->pFullFilename == NULL) || (pContext->pOutputPathname == NULL)) )
+    if ( (eCommand == eEMPTY) ||
+         (pContext->pFullFilename == NULL) ||
+         ( (eCommand != eGETSTR) && (pContext->pOutputPathname == NULL)) )
     {
         if (pContext->pFullFilename)
         {
@@ -486,7 +521,7 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
             free(pContext->pCheckEnumPathname);
             pContext->pCheckEnumPathname = NULL;
         }
-        if (iCommand == NONE)
+        if (eCommand == eEMPTY)
         {
             exitOnError((char*)"Parameters not understood", NULL, NULL, 1);
         }
@@ -496,7 +531,7 @@ static int parseArguments( int argc, char *argv[], ConvmArguments *pContext)
         }
     }
 
-    return iCommand;
+    return eCommand;
 }
 
 /**
@@ -520,9 +555,9 @@ static int mySystemCmd( const char *pCommand)
         pCcmdExePath = getenv( "COMSPEC");
         if (pCcmdExePath)
         {
-            cmd_exe_path_len = strlen(pCcmdExePath);
+            cmd_exe_path_len = strlen( pCcmdExePath);
 
-            tmpCommandLen = strlen(pCommand);
+            tmpCommandLen = strlen( pCommand);
             pTmpCommand = (char *)calloc(1, cmd_exe_path_len + tmpCommandLen + 5);
             if (pTmpCommand)
             {
@@ -564,7 +599,7 @@ static void updateFileType( ConvmArguments *pContext, char *pfullOutputFilename)
     const char  *pCheckEmulatorPresent = "where iix > nul\0";
     const char  *pCmdEmulatorPnt = "iix chtyp -t PNT -a 2 ";
     const char  *pCmdEmulatorPic = "iix chtyp -t PIC -a 0 ";
-    const char  *pEndString = "\"";
+    const char  *pEndString;
     char        *pDuplicateString = NULL;
     char        *pShortPathname = NULL;
     char        *ptempFilename = NULL;
@@ -589,12 +624,14 @@ static void updateFileType( ConvmArguments *pContext, char *pfullOutputFilename)
                 if ( ! iError)
                 {
                     (void )printf( "DATAM: GetShortPathName() failed error = %d\n", (int )GetLastError());
+                    free( pShortPathname);
                     pShortPathname = strdup(pfullOutputFilename);
                 }
                 else
                 {
                     if ( ! strlen( pShortPathname))
                     {
+                        free( pShortPathname);
                         pShortPathname = strdup( pfullOutputFilename);
                     }
                     else
@@ -602,11 +639,15 @@ static void updateFileType( ConvmArguments *pContext, char *pfullOutputFilename)
                         pShortPathname = strcat( pShortPathname, getFileName(pfullOutputFilename));
                     }
                 }
-                (void )printf( "DATAM: to   = %s\n", pShortPathname);
+                if (pShortPathname)
+                {
+                    (void )printf( "DATAM: to   = %s\n", pShortPathname);
+                }
                 free( ptempFilename);
             }
             else
             {
+                free( pShortPathname);
                 pShortPathname = strdup( pfullOutputFilename);
             }
 
@@ -641,7 +682,7 @@ static void updateFileType( ConvmArguments *pContext, char *pfullOutputFilename)
 }
 
 /**
-* @fn static char *createOutputPathname( char *pFullFilename, char *pOutPathname, int iCommand)
+* @fn static char *createOutputPathname( char *pFullFilename, char *pOutPathname, eCommand_t eCommand)
 * @brief alloc and change the file extension
 *
 * @param[in]        pFullFilename
@@ -650,13 +691,13 @@ static void updateFileType( ConvmArguments *pContext, char *pfullOutputFilename)
 *
 * @return a new pointer to the new pathname
 */
-static char *createOutputPathname( char *pFullFilename, char *pOutPathname, int iCommand)
+static char *createOutputPathname( char *pFullFilename, char *pOutPathname, eCommand_t eCommand)
 {
     char            *pOutputPathname = NULL;
     const char      *pEndString = NULL;
-    size_t           uOutputPathnameLen = 0;
+    size_t           uOutputPathnameLen;
 
-    if ( (pFullFilename) && (iCommand != NONE) )
+    if ( (pFullFilename) && (eCommand != eEMPTY) )
     {
         if (pOutPathname)
         {
@@ -682,7 +723,6 @@ static char *createOutputPathname( char *pFullFilename, char *pOutPathname, int 
                 {
                     (void )strncpy_s( pOutputPathname, uOutputPathnameLen, pOutPathname, strlen( (const char *)pOutPathname));
                     pOutputPathname = strcat( pOutputPathname, pEndString);
-                    pEndString = NULL;
                 }
                 else
                 {
@@ -693,17 +733,9 @@ static char *createOutputPathname( char *pFullFilename, char *pOutPathname, int 
                 // Change the extention of the output file
                 if (pOutputPathname[strlen( pOutputPathname) - 4] == '.')
                 {
-                    pEndString = &pOutputPathname[strlen( pOutputPathname) - 3];
-                    if (pEndString)
-                    {
-                        pOutputPathname[strlen( pOutputPathname) - 3] = 'b';
-                        pOutputPathname[strlen( pOutputPathname) - 2] = 'i';
-                        pOutputPathname[strlen( pOutputPathname) - 1] = 'n';
-                    }
-                    else
-                    {
-                        pOutputPathname = strcat( pOutputPathname, ".bin");
-                    }
+                    pOutputPathname[strlen( pOutputPathname) - 3] = 'b';
+                    pOutputPathname[strlen( pOutputPathname) - 2] = 'i';
+                    pOutputPathname[strlen( pOutputPathname) - 1] = 'n';
                 }
             }
         }
@@ -746,7 +778,6 @@ static char *myBuidAboutString( void)
     char                filePath[MAX_PATH];
     unsigned long       ulSize;
     unsigned long       ulHandle;
-    VS_FIXEDFILEINFO   *pfileInfo = NULL;
     UINT                uLen;
     char               *pResourceBuffer = NULL;
     char               *pApplicationName;
@@ -758,64 +789,73 @@ static char *myBuidAboutString( void)
     if (ulSize == 0 || ulSize == MAX_PATH)
     {
         printf("Error lors de la récupération du chemin du fichier.\n");
-        return pfileVersionInformation;
-    }
-
-    // ulHandle is set to zero
-    ulSize = GetFileVersionInfoSizeA( filePath, &ulHandle);
-    if (ulSize == 0)
-    {
-        printf("Error lors de la récupération de la taille des informations de version.\n");
-        return pfileVersionInformation;
-    }
-
-    pResourceBuffer = (char *)malloc( ulSize);
-    if (!pResourceBuffer)
-    {
-        printf( "Error d'allocation de mémoire.\n");
-        return pfileVersionInformation;
-    }
-
-    ulHandle = 666666666;     // random value to avoid stupîd warning on ulHandle if equal to zero
-    if (!GetFileVersionInfoA( filePath, ulHandle, ulSize, pResourceBuffer))
-    {
-        printf("Error lors de la récupération des informations de version.\n");
-        free (pResourceBuffer);
-        return pfileVersionInformation;
-    }
-
-    pApplicationName = myGetFileName( filePath);
-    if (pApplicationName)
-    {
-        ulSize = (unsigned long)strlen(pApplicationName) + 16;
     }
     else
     {
-        ulSize = 16;
-    }
-    // Retrieve the LegalCopyright field
-    if (!VerQueryValueA( pResourceBuffer, "\\StringFileInfo\\040904b0\\LegalCopyright", (LPVOID *)&pLegalCopyright, &uLen))
-    {
-        printf("Erreur lors de la récupération du champ LegalCopyright.\n");
-    }
-    ulSize += uLen;
-    // Retrieve the ProductVersion field
-    if (!VerQueryValueA( pResourceBuffer, "\\StringFileInfo\\040904b0\\ProductVersion", (LPVOID *)&pVersion, &uLen))
-    {
-        printf("Erreur lors de la récupération du champ LegalCopyright.\n");
-    }
+        // ulHandle is set to zero
+        ulSize = GetFileVersionInfoSizeA( filePath, &ulHandle);
+        if (ulSize == 0)
+        {
+            printf("Error lors de la récupération de la taille des informations de version.\n");
+        }
+        else
+        {
+            pResourceBuffer = (char *)malloc( ulSize);
+            if (!pResourceBuffer)
+            {
+                printf( "Error d'allocation de mémoire.\n");
+            }
+            else
+            {
+                ulHandle = 0;
+                if ( ! GetFileVersionInfoA( (const char *)filePath, ulHandle, ulSize, pResourceBuffer))
+                {
+                    printf("Error lors de la récupération des informations de version.\n");
+                }
+                else
+                {
+                    pApplicationName = myGetFileName( filePath);
+                    if (pApplicationName)
+                    {
+                        ulSize = (unsigned long)strlen(pApplicationName) + 16;
+                    }
+                    else
+                    {
+                        ulSize = 16;
+                    }
+                    // Retrieve the LegalCopyright field
+                    if (!VerQueryValueA( pResourceBuffer, "\\StringFileInfo\\040904b0\\LegalCopyright", (LPVOID *)&pLegalCopyright, &uLen))
+                    {
+                        printf("Erreur lors de la récupération du champ LegalCopyright.\n");
+                    }
+                    else
+                    {
+                        ulSize += uLen;
+                        // Retrieve the ProductVersion field
+                        if (!VerQueryValueA( pResourceBuffer, "\\StringFileInfo\\040904b0\\ProductVersion", (LPVOID *)&pVersion, &uLen))
+                        {
+                            printf("Erreur lors de la récupération du champ LegalCopyright.\n");
+                        }
+                        else
+                        {
+                            ulSize += uLen;
+                            pfileVersionInformation = (char *)malloc( ulSize);
+                            if (!pfileVersionInformation)
+                            {
+                                printf("Erreur d'allocation de mémoire.\n");
+                            }
+                            else
+                            { 
+                                sprintf( pfileVersionInformation, "%s v%s, %s", pApplicationName ? pApplicationName : "", pVersion, pLegalCopyright);
 
-    ulSize += uLen;
-    pfileVersionInformation = (char *)malloc( ulSize);
-    if (!pfileVersionInformation)
-    {
-        printf("Erreur d'allocation de mémoire.\n");
-        return NULL;
+                            }
+                        }
+                    }
+                }
+                free( pResourceBuffer);
+            }
+        }
     }
-
-    sprintf( pfileVersionInformation, "%s v%s, %s", pApplicationName ? pApplicationName : "", pVersion, pLegalCopyright);
-
-    free( pResourceBuffer);
 
     return pfileVersionInformation;
 }
@@ -837,12 +877,13 @@ int main(int argc, char* argv[])
     char               *pOutputFileData = NULL;
     const char         *pEndString = NULL;
     char               *pAboutString = NULL;
-    int                 iCommand = NONE;
+    eCommand_t          eCommand = eEMPTY;
     unsigned int        uInputFileSize = 0;
-    unsigned short int  uDataSize = 0;
+    unsigned short      uDataSize = 0;
     unsigned char       uFullFilename;
-    unsigned short int  uNumLines = 0;
-    unsigned short int  uResultDataSize;
+    unsigned short      uNumLines = 0;
+    unsigned short      uResultDataSize;
+    unsigned int        uOjectIndex;
 
     // Message Information Get the verion and copyright from the file datam.rc
     pAboutString = myBuidAboutString();
@@ -853,7 +894,7 @@ int main(int argc, char* argv[])
         {
             if ((!strcmp((const char*)argv[1], "-help")) || (!strcmp((const char*)argv[1], "-h")) || (!strcmp((const char*)argv[1], "-?")))
             {
-                usage( pAboutString);
+                datam_usage( pAboutString);
             }
             else if ((!strcmp((const char*)argv[1], "-version")) || (!strcmp((const char*)argv[1], "-v")))
             {
@@ -862,30 +903,33 @@ int main(int argc, char* argv[])
 
             if (pAboutString)
             {
-                free(pAboutString);
+                free( pAboutString);
+                pAboutString = NULL;
             }
             return 0;
         }
         else
         {
-            usage( pAboutString);
+            datam_usage( pAboutString);
             (void )printf( "\n");
             if ( pAboutString)
             {
                 free( pAboutString);
+                pAboutString = NULL;
             }
             exitOnError( (char *)"not enough parameters", NULL, NULL, 1);
         }
     }
 
-    (void )printf( "\n%s\n\n", pAboutString);
     if (pAboutString)
     {
+        (void )printf( "\n%s\n\n", pAboutString);
+
         free( pAboutString);
         pAboutString = NULL;
     }
 
-    iCommand = parseArguments( argc, argv, &context);
+    eCommand = parseArguments( argc, argv, &context);
 
     /*
     (void )printf("\n");
@@ -911,22 +955,18 @@ int main(int argc, char* argv[])
         exitOnError( (char *)"imput file is empty", NULL, NULL, 1);
     }
 
-    (void )printf( "\n");
     pInputFileData = readFileToMemory( context.pFullFilename);   // input file is in memory
     if ( (pInputFileData) && (context.pFullFilename) )
     {
-        if (iCommand == DATALST)
+        if (eCommand == eDATALST)
         {
             uFullFilename = (unsigned char )strlen( context.pFullFilename) - 4;
             if ( (uFullFilename > 4) && (context.pFullFilename[uFullFilename] == '.') )
             {
                 pEndString = &context.pFullFilename[strlen( context.pFullFilename) - 3];
-                if (pEndString)
+                if ( ! strcmp( pEndString, "txt"))
                 {
-                    if ( ! strcmp( pEndString, "txt"))
-                    {
-                        findNumLinesLst( context.pFullFilename, &uNumLines, &uDataSize);
-                    }
+                    findNumLinesLst( context.pFullFilename, &uNumLines, &uDataSize);
                 }
                 else
                 {
@@ -945,7 +985,7 @@ int main(int argc, char* argv[])
                 uDataSize += (unsigned short int )sizeof( unsigned short int) + (unsigned short int )(uNumLines * (unsigned short int )sizeof( unsigned short int));
                 uDataSize += 64;   // 256 is an extension for memory security
 
-                pOutputFileData = (char *)calloc(1, uDataSize + 64);
+                pOutputFileData = (char *)calloc( 1, uDataSize + 64);
                 if (pOutputFileData)
                 {
                     uResultDataSize = str2data( context.pFullFilename, uNumLines, pOutputFileData, uDataSize);
@@ -957,55 +997,77 @@ int main(int argc, char* argv[])
                         // (void )mySentence( pOutputFileData, 39);
                         // (void )mySentence( pOutputFileData, 49);
 
-                        pfullOutputFilename = createOutputPathname( context.pFullFilename, context.pOutputPathname, iCommand);
+                        pfullOutputFilename = createOutputPathname( context.pFullFilename, context.pOutputPathname, eCommand);
                         if (pfullOutputFilename)
                         {
                             if (context.pCheckEnumPathname)
                             {
-                                unsigned int uOjectIndex = myComputeIndexOf( context.pCheckEnumPathname, (char *)"eObjects,");
+                                uOjectIndex = myComputeIndexOf( context.pCheckEnumPathname, (char *)"eObjects,");
                                 if (uOjectIndex == 0)
                                 {
                                     exitOnError( (char *)"enum file is empty", NULL, context.pCheckEnumPathname, 1);
                                 }
                                 else
                                 {
-                                    if (strcmp( mySentence( pOutputFileData, (unsigned short)uOjectIndex), "Objets") != 0)
+                                    if (strcmp( mySentence( pOutputFileData, (unsigned short )uOjectIndex), "Objets") != 0)
                                     {
                                         exitOnError( (char *)"Synchro between enum and string table is BAD", NULL, pfullOutputFilename, 5);
                                     }
                                 }
                             }
 
-                            if (writeFileFromMemory( pfullOutputFilename, pOutputFileData, uResultDataSize))
+                            if (writeFileFromMemory( pfullOutputFilename, pOutputFileData, (unsigned int)uResultDataSize))
                             {
                                 exitOnError( (char *)"failed to write output file", NULL, pfullOutputFilename, 4);
                             }
                             free( pfullOutputFilename);
                         }
-                        free( pOutputFileData);
                     }
                     else
                     {
                         exitOnError( (char *)"Out of memory", NULL, NULL, 1);
                     }
+                    free( pOutputFileData);
                 }
             }
         }
-        else if (iCommand == CSVTOC)
+        else if (eCommand == eCSVTOC)
         {
-            uInputFileSize = getMyFileSize( context.pFullFilename);
-
-            (void )printf("\n");
-            pInputFileData = readFileToMemory( context.pFullFilename);   // input file is in memory
             if ( (pInputFileData) && (uInputFileSize > 100) )
             {
                 exitOnError( (char *)"Not implemented", NULL, NULL, 6);
             }
         }
-        else if (iCommand == DUMP)
+        else if (eCommand == eDUMP)
         {
-            (void )printf( "\n");
             exitOnError( (char *)"Not implemented", NULL, NULL, 6);
+        }
+        else if (eCommand == eGETSTR)
+        {
+            uFullFilename = (unsigned char )strlen( context.pFullFilename) - 4;
+            if ( (uFullFilename > 4) && (context.pFullFilename[uFullFilename] == '.') )
+            {
+                pEndString = &context.pFullFilename[strlen( context.pFullFilename) - 3];
+                if ( ! strcmp( pEndString, "bin"))
+                {
+                    if ( (context.iTabColumns >= 0) && (context.iTabColumns < 1000) )
+                    {
+                        (void )printf( "\nString at index %d is :\n%s\n", context.iTabColumns, mySentence( pInputFileData, (unsigned short )context.iTabColumns));
+                    }
+                    else
+                    {
+                        exitOnError( (char *)"Bad index", NULL, NULL, 1);
+                    }
+                }
+                else
+                {
+                    exitOnError( (char *)"imput file extension is not supported", NULL, NULL, 1);
+                }
+            }
+            else
+            {
+                exitOnError( (char *)"imput file extension is not supported", NULL, NULL, 1);
+            }
         }
         else
         {
@@ -1013,13 +1075,18 @@ int main(int argc, char* argv[])
             ;
         }
     }
-    (void )printf("\n");
+    //(void )printf("\n");
 
     if (context.pFullFilename)
     {
         free( context.pFullFilename);
     }
 
-    (void )printf(" Work is done with success\n");
+    if (pInputFileData)
+    {
+        free( pInputFileData);
+    }
+
+    //(void )printf(" Work is done with success\n");
     return 0;
 }

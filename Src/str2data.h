@@ -6,13 +6,13 @@
 extern "C" {
 #endif
 
-    void findNumLinesLst( char *pinputFile, unsigned short int *puNumLines, unsigned short int *puDataSize);
+    void findNumLinesLst( char *pinputFile, unsigned short *puNumLines, unsigned short *puDataSize);
 
-    char *mySentence( char *pOutputFileData, unsigned short int uNumber);
+    char *mySentence( char *pOutputFileData, unsigned short uNumber);
 
-    unsigned short int str2data( char *pInputFileName, unsigned short int uNumLines, char *pOutputFileData, unsigned short int uDataSize);
+    unsigned short str2data( char *pInputFileName, unsigned short uNumLines, char *pOutputFileData, unsigned short uDataSize);
 
-    unsigned int myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName);
+    unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementName);
 
 #ifdef __cplusplus
 }
