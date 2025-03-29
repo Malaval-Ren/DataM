@@ -3,12 +3,15 @@
 
 # Explicitly declare text files you want to always be normalized and converted
 # to native line endings on checkout.
+*.asm text
 *.bat text
 *.c text
+*.cc text
 *.code-workspace text
 *.cpp text
 *.filters text
 *.h text
+*.macros text
 *.md text
 *.rc text
 *.resource.h text
@@ -19,8 +22,6 @@
 *.vcxproj text
 *.vcxproj.filters text
 *.vcxproj.user text
-*.code-workspace text
-*.rc text
 
 # Declare files that will always have CRLF line endings on checkout.  LINUX
 *.desktop text eol=lf
