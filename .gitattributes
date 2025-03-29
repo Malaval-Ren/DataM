@@ -20,6 +20,7 @@
 *.vcxproj.filters text
 *.vcxproj.user text
 *.code-workspace text
+*.rc text
 
 # Declare files that will always have CRLF line endings on checkout.  LINUX
 *.desktop text eol=lf
