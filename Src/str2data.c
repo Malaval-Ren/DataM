@@ -34,7 +34,6 @@
 
 /**
  * @fn void findNumLinesLst( char *pInputFile, unsigned short *pInputFile, unsigned short *puDataSize)
- *
  * @brief
  *
  * @param[in]       pInputFile :
@@ -76,12 +75,11 @@ void findNumLinesLst( char *pInputFile, unsigned short *puNumLines, unsigned sho
 }
 
 /**
- * @fn char *mySentence( pTheGameStruct pGameContext, unsigned short uNumber)
+ * @fn char *mySentence( char *pOutputFileData, unsigned short uNumber)
+ * @brief function to extract string at index uNumber in the binary file pOutputFileData
  * 
- * @brief debug function to test the conversion
- * 
- * @param[in,out]   pGameContext : game context values
- * @param[in]       iNumber : enum eSentence (the index in the array)
+ * @param[in,out]   pOutputFileData : IR data file begin by index of following string 
+ * @param[in]       uNumber : enum eSentence (the index in the array)
  *
  * @return char * pointer to the string
  */
@@ -89,7 +87,11 @@ char *mySentence( char *pOutputFileData, unsigned short uNumber)
 {
     short int           *pDataPic;
     char                *pDataStr = NULL;
+    wchar_t             *pWideString = NULL;
+    char                *pOemString = NULL;
     unsigned short       uMaxPic;
+    unsigned int         uWideStringLen;
+    unsigned int         uOemStringLen;
 
     if (pOutputFileData)
     {
@@ -101,16 +103,64 @@ char *mySentence( char *pOutputFileData, unsigned short uNumber)
             pDataPic++;
             pDataStr = (char *)pDataPic;
             pDataStr += ((uMaxPic * sizeof( short int)) + (unsigned short int )pDataPic[uNumber]);
+
+            // Step 1: Convert ANSI to wide character
+            uWideStringLen = MultiByteToWideChar( 1252, 0, pDataStr, -1, NULL, 0);
+            if (uWideStringLen == 0)
+            {
+                (void )printf( "Error of len = 0 in MultiByteToWideChar = %d\n", GetLastError());
+            }
+            else
+            {
+                pWideString = (wchar_t *)calloc( uWideStringLen, sizeof (wchar_t));
+                if (pWideString)
+                {
+                    // Convert ANSI to wide character
+                    if (MultiByteToWideChar( 1252, 0, pDataStr, -1, pWideString, uWideStringLen) == 0)
+                    {
+                        (void )printf( "Error in MultiByteToWideChar = %d\n", GetLastError());
+                    }
+                    else
+                    {
+                        // Step 2: Convert wide character to CP_OEMCP default mode of console format 
+                        uOemStringLen = WideCharToMultiByte( CP_OEMCP, 0, pWideString, -1, NULL, 0, NULL, NULL);
+                        if (uOemStringLen == 0)
+                        {
+                            (void )printf( "Error of len = 0 in WideCharToMultiByte = %d\n", GetLastError());
+                        }
+                        else
+                        {
+                            pOemString = (char *)calloc( uOemStringLen, sizeof( char));
+                            if (pOemString)
+                            {
+                                // Convert wide character to UTF-8
+                                if (WideCharToMultiByte( CP_OEMCP, 0, pWideString, -1, pOemString, uOemStringLen, NULL, NULL) == 0)
+                                {
+                                    (void )printf( "Error in WideCharToMultiByte = %d\n", GetLastError());
+                                }
+                                //else
+                                //{
+                                //    (void )printf( " result : %u : oem   %s\n", uNumber, pOemString);
+                                //}
+                            }
+                        }
+                    }
+                    free( pWideString);
+                }
+            }
         }
     }
-    // (void )printf( " result : %u : %s\n", uNumber, pDataStr);
 
-    return pDataStr;
+    if (pOemString == NULL)
+    {
+        pOemString = strdup( pDataStr);
+    }
+
+    return pOemString;
 }
 
 /**
  * @fn unsigned short str2data( char *pInputFileName, unsigned short uNumLines, char *pOutputFileData, unsigned short uDataSize)
- *
  * @brief 
  *
  * @param[in]       pInputFileName : 
@@ -317,31 +367,32 @@ unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementNam
     if (pFound == NULL)
     {
         (void )printf( "Erreur : The begin of eSentence_t declaration not found");
-        return uIndexObjects;
     }
-
-    // parse the enum eSentence_t
-    while (fgets( buffer, sizeof( buffer), pFichier) != NULL)
+    else
     {
-        uLigne++;
-        pFound = strstr(buffer, "} eSentence_t;");
-        if (pFound != NULL)
+        // parse the enum eSentence_t
+        while (fgets( buffer, sizeof( buffer), pFichier) != NULL)
         {
-            break;
-        }
-        
-        pFound = strstr( buffer, pEnumElementName);
-        if (pFound != NULL)
-        {
-            uIndexObjects = uCompteur - 1;
-            break;
-        }
-
-        for (uIndex = 0; uIndex < strlen( buffer); uIndex++)
-        {
-            if (buffer[uIndex] == ',')
+            uLigne++;
+            pFound = strstr(buffer, "} eSentence_t;");
+            if (pFound != NULL)
             {
-                uCompteur++;
+                break;
+            }
+        
+            pFound = strstr( buffer, pEnumElementName);
+            if (pFound != NULL)
+            {
+                uIndexObjects = uCompteur - 1;
+                break;
+            }
+
+            for (uIndex = 0; uIndex < strlen( buffer); uIndex++)
+            {
+                if (buffer[uIndex] == ',')
+                {
+                    uCompteur++;
+                }
             }
         }
     }
