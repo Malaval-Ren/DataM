@@ -77,9 +77,9 @@ char *parseAntiSlashChar( char **pPathname)
 
         //if (iModif != 0)
         //{
-        //  // printf( "Full in  : %s\n", *pPathname);
-        //  printf( "Working file : %s\n\n", pResultFilename);
-        //  printf( "Anti Slash corrected is = %d\n", iModif);
+        //  // (void )printf( "Full in  : %s\n", *pPathname);
+        //  (void )printf( "Working file : %s\n\n", pResultFilename);
+        //  (void )printf( "Anti Slash corrected is = %d\n", iModif);
         //}
 
         free( *pPathname);

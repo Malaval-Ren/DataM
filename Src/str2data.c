@@ -262,7 +262,7 @@ unsigned short str2data( char *pInputFileName, unsigned short uNumLines, char *p
                 if ( (pRunning - pOutputFileData) <= 0x0000FFFF)
                 {
                     uOutputDataSize = (unsigned short int )(pRunning - pOutputFileData);
-                    // printf("\nTotal by pointer = %u  uOutputDataSize= %u\n", uTotal, uOutputDataSize);
+                    // (void )printf( "\nTotal by pointer = %u  uOutputDataSize= %u\n", uTotal, uOutputDataSize);
                 }
             }
 
@@ -310,7 +310,7 @@ static void findNumLinesHeader( char *pInputFile, unsigned short int *puNumLines
                         uLineSize = (unsigned short )strlen( line);
                         if ( (line[uLineSize - 1] == '\n') && (line[uLineSize - 2] == ',') && (line[uLineSize - 3] == '"') )
                         {
-                            // printf("#%02d : %d : %s", *puNumLines, *puDataSize, line);
+                            // (void )printf( "#%02d : %d : %s", *puNumLines, *puDataSize, line);
                             uLineSize -= 3;
                             *puDataSize += uLineSize;
                         }

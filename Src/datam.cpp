@@ -84,33 +84,33 @@ static void datam_usage( char *pAboutString)
 {
     if (pAboutString)
     {
-        printf("\n%s\n\n", pAboutString);
+        (void )printf( "\n%s\n\n", pAboutString);
     }
-    printf( "Usage: datam <option> \"<filespec>\" <convmspec> \"<number>\" \"<filespec>\" \"<output folder>\"\n");
+    (void )printf( "Usage: datam <option> \"<filespec>\" <convmspec> \"<number>\" \"<filespec>\" \"<output folder>\"\n");
 
-    printf( "\n  <option> is one of the following\n");
-    printf( "   +lower       - the output file name is in lower case\n");
-    printf( "   +chkenu      - Check synchro enum eSentence_t and list of string\n");
-    printf( "                  <filespec> the path to file with enum eSentence_t definition\n");
+    (void )printf( "\n  <option> is one of the following\n");
+    (void )printf( "   +lower       - the output file name is in lower case\n");
+    (void )printf( "   +chkenu      - Check synchro enum eSentence_t and list of string\n");
+    (void )printf( "                  <filespec> the path to file with enum eSentence_t definition\n");
 
-    printf( "\n  <convmspec> is one of the following\n");
-    printf( "   -dump        - dump content of a supported file format\n");
-    printf( "   -sltb        - file with strings list to binary file\n");
-    printf( "   -ctbl        - create table from .cvs to .c\n");
-    printf( "   -getstr      - get string at index in binary file\n");
+    (void )printf( "\n  <convmspec> is one of the following\n");
+    (void )printf( "   -dump        - dump content of a supported file format\n");
+    (void )printf( "   -sltb        - file with strings list to binary file\n");
+    (void )printf( "   -ctbl        - create table from .cvs to .c\n");
+    (void )printf( "   -getstr      - get string at index in binary file\n");
 
-    printf( "\n  <filespec> file extension could be :\n");
-    printf( "   -dump          'any'\n");
+    (void )printf( "\n  <filespec> file extension could be :\n");
+    (void )printf( "   -dump          'any'\n");
 
-    printf( "\n  <filespec> :\n");
-    printf( "   -sltb          'pathname to txt file'\n");
-    printf( "  <output folder> :\n");
-    printf( "   -sltb          'pathname to folder destination'\n");
+    (void )printf( "\n  <filespec> :\n");
+    (void )printf( "   -sltb          'pathname to txt file'\n");
+    (void )printf( "  <output folder> :\n");
+    (void )printf( "   -sltb          'pathname to folder destination'\n");
 
-    printf( "\n  <number> could be:\n");
-    printf( "   -getstr        '0 .. 999'\n");
-    printf( "  <filespec> :\n");
-    printf( "   -getstr        'pathname to bin file'\n");
+    (void )printf( "\n  <number> could be:\n");
+    (void )printf( "   -getstr        '0 .. 999'\n");
+    (void )printf( "  <filespec> :\n");
+    (void )printf( "   -getstr        'pathname to bin file'\n");
 }
 
 /**
@@ -239,7 +239,7 @@ static void pathanmeToLowerCase( char **pPathname)
     char        *pRunning = NULL;
     const char  *pEndString = NULL;
 
-    // printf("before input path is : %s\n", context.pFullFilename);
+    // (void )printf( "before input path is : %s\n", context.pFullFilename);
     pEndString = getFileName( *pPathname);
     if (pEndString)
     {
@@ -826,7 +826,7 @@ static char *myBuidAboutString( void)
                     // Retrieve the LegalCopyright field
                     if ( ! VerQueryValueA( pResourceBuffer, "\\StringFileInfo\\040904b0\\LegalCopyright", (LPVOID *)&pLegalCopyright, &uLen))
                     {
-                        (void)printf("Erreur lors de la récupération du champ LegalCopyright.\n");
+                        (void )printf( "Erreur lors de la récupération du champ LegalCopyright.\n");
                     }
                     else
                     {
@@ -931,17 +931,17 @@ int main( int argc, char* argv[])
     eCommand = parseArguments( argc, argv, &context);
 
     /*
-    (void )printf("\n");
+    (void )printf( "\n");
 #ifdef _WIN32
-    (void )printf("x86 mode 32 bits\n\n");
+    (void )printf( "x86 mode 32 bits\n\n");
 #else
-    (void )printf("x64 mode 64 bits\n\n");
+    (void )printf( "x64 mode 64 bits\n\n");
 #endif
 
-    (void )printf("\n");
+    (void )printf( "\n");
     */
     //pfullFilename = parseSpaceChar( &pfullFilename);
-    //printf("");
+    //(void )printf( "");
 
     if ( ! context.pFullFilename)
     {
