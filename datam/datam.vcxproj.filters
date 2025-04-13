@@ -55,7 +55,7 @@
     <None Include="..\gpl-3.0_us.md" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\datam_256x256.ico">
+    <Image Include="datam_256x256.ico">
       <Filter>Fichiers de ressources</Filter>
     </Image>
   </ItemGroup>

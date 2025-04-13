@@ -14,7 +14,7 @@ This software is under the **GPLv3** license
 ## Help usage
 
 ```bash
-datam.exe v1.10.11.25, Copyright (c) 2022-2025 R. Malaval & F. Mure
+datam.exe v1.11.12.29, Copyright (c) 2022..2025 R. Malaval & F. Mure
 
 Usage: datam <option> "<filespec>" <convmspec> "<number>" "<filespec>" "<output folder>"
 
