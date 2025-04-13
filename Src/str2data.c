@@ -375,10 +375,10 @@ unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementNam
             break;
         }
     }
-    // jump to the declaration of the enum eSentence_t
-    (void )fgets( buffer, sizeof( buffer), pFichier);
-    (void )fgets( buffer, sizeof( buffer), pFichier);
-    (void )fgets( buffer, sizeof( buffer), pFichier);
+    // jump to the declaration of the first element of enum eSentence_t
+    (void )fgets( buffer, sizeof( buffer), pFichier);   // skip the line with ' * @brief '
+    (void )fgets( buffer, sizeof( buffer), pFichier);   // skip the line with ' */'
+    (void )fgets( buffer, sizeof( buffer), pFichier);   // skip the line with 'typedef enum {'
     pFound = strstr( buffer, "typedef enum {");
     if (pFound == NULL)
     {
@@ -390,7 +390,8 @@ unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementNam
         while (fgets( buffer, sizeof( buffer), pFichier) != NULL)
         {
             uLigne++;
-            pFound = strstr(buffer, "} eSentence_t;");
+            pFound = strstr( buffer, "} eSentence_t;");
+            // Check if the end of the enum is reached
             if (pFound != NULL)
             {
                 break;
@@ -399,12 +400,18 @@ unsigned short myComputeIndexOf( char *pCheckEnumPathname, char *pEnumElementNam
             pFound = strstr( buffer, pEnumElementName);
             if (pFound != NULL)
             {
-                uIndexObjects = uCompteur - 1;
+                uIndexObjects = uCompteur;
                 break;
             }
 
             for (uIndex = 0; uIndex < strlen( buffer); uIndex++)
             {
+                // stop at the begin of doxygen comments
+                if ( (buffer[uIndex] == '/') && (buffer[uIndex + 1] == '*') && (buffer[uIndex + 2] == '*'))
+                {
+                    break;
+                }
+
                 if (buffer[uIndex] == ',')
                 {
                     uCompteur++;
