@@ -142,6 +142,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>set ParentDir=$(SolutionDir)..\
+if exist "%ParentDir%\datam.exe" (
+    del /F "%ParentDir%\datam.exe"
+)
+copy /Y "$(TargetDir)datam.exe" "%ParentDir%\datam.exe"
+if not exist "%ParentDir%\datam.exe" (
+    echo Échec : Le fichier n'a pas été copié.
+    exit 1
+)
+exit 0</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Src\conv.h" />
