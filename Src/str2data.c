@@ -75,15 +75,16 @@ void findNumLinesLst( char *pInputFile, unsigned short *puNumLines, unsigned sho
 }
 
 /**
- * @fn char *mySentence( char *pOutputFileData, unsigned short uNumber)
+ * @fn char *mySentence( char *pOutputFileData, unsigned short uNumber, BOOL bBackLineToSpace)
  * @brief function to extract string at index uNumber in the binary file pOutputFileData
  * 
  * @param[in,out]   pOutputFileData : IR data file begin by index of following string 
  * @param[in]       uNumber : enum eSentence (the index in the array)
+ * @param[in]       bBackLineToSpace : replace cahr '\n' by ' ' in the string
  *
  * @return char * pointer to the string
  */
-char *mySentence( char *pOutputFileData, unsigned short uNumber)
+char *mySentence( char *pOutputFileData, unsigned short uNumber, BOOL bBackLineToSpace)
 {
     short int           *pDataPic;
     char                *pDataStr = NULL;
@@ -103,6 +104,21 @@ char *mySentence( char *pOutputFileData, unsigned short uNumber)
             pDataPic++;
             pDataStr = (char *)pDataPic;
             pDataStr += ((uMaxPic * sizeof( short int)) + (unsigned short int )pDataPic[uNumber]);
+
+            if (bBackLineToSpace)
+            {
+                // replace '\n' by ' ' used to display in console in case of error
+                pOemString = pDataStr;
+                while (*pOemString != '\0')
+                {
+                    if (*pOemString == '\n')
+                    {
+                        *pOemString = ' ';
+                    }
+                    pOemString++;
+                }
+                pOemString = NULL;
+            }
 
             // Step 1: Convert ANSI to wide character
             uWideStringLen = MultiByteToWideChar( 1252, 0, pDataStr, -1, NULL, 0);

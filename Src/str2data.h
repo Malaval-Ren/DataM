@@ -8,7 +8,7 @@ extern "C" {
 
     void findNumLinesLst( char *pinputFile, unsigned short *puNumLines, unsigned short *puDataSize);
 
-    char *mySentence( char *pOutputFileData, unsigned short uNumber);
+    char *mySentence( char *pOutputFileData, unsigned short uNumber, BOOL bBackLineToSpace);
 
     unsigned short str2data( char *pInputFileName, unsigned short uNumLines, char *pOutputFileData, unsigned short uDataSize);
 

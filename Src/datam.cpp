@@ -982,7 +982,7 @@ int main( int argc, char* argv[])
                 // printf( "\nsizeof( unsigned short int)=%d\n", (unsigned int )sizeof( unsigned short int));
                 // printf( "lines=%d : header=%d : data=%d\n", uNumLines, (unsigned short int )(uNumLines * (unsigned short int )sizeof( unsigned short int)), uDataSize);
                 uDataSize += (unsigned short int )sizeof( unsigned short int) + (unsigned short int )(uNumLines * (unsigned short int )sizeof( unsigned short int));
-                uDataSize += 64;   // 256 is an extension for memory security
+                uDataSize += 64;   // 64 is an extension for memory security
 
                 pOutputFileData = (char *)calloc( 1, uDataSize + 64);
                 if (pOutputFileData)
@@ -992,9 +992,9 @@ int main( int argc, char* argv[])
                     if (uResultDataSize <= uDataSize)
                     {
                         // display a string from the file for debug
-                        // (void )mySentence( pOutputFileData, 19);
-                        // (void )mySentence( pOutputFileData, 39);
-                        // (void )mySentence( pOutputFileData, 49);
+                        // (void )mySentence( pOutputFileData, 19, FALSE);
+                        // (void )mySentence( pOutputFileData, 39, FALSE);
+                        // (void )mySentence( pOutputFileData, 49, FALSE);
 
                         pfullOutputFilename = createOutputPathname( context.pFullFilename, context.pOutputPathname, eCommand);
                         if (pfullOutputFilename)
@@ -1008,9 +1008,10 @@ int main( int argc, char* argv[])
                                 }
                                 else
                                 {
-                                    if (strcmp( mySentence( pOutputFileData, (unsigned short )uOjectIndex), "Objets") != 0)
+                                    pEndString = mySentence( pOutputFileData, (unsigned short )uOjectIndex, TRUE);
+                                    if (strcmp( pEndString, "Objets") != 0)
                                     {
-                                        exitOnError( (char *)"Synchro between enum and string table is BAD", NULL, pfullOutputFilename, 5);
+                                        exitOnError( (char *)"Synchro between enum and string table is BAD\nfound :", (char *)pEndString, pfullOutputFilename, 5);
                                     }
                                 }
                             }
@@ -1051,7 +1052,7 @@ int main( int argc, char* argv[])
                 {
                     if ( (context.iTabColumns >= 0) && (context.iTabColumns < 1000) )
                     {
-                        (void )printf( "\nString at index %d is :\n%s\n", context.iTabColumns, mySentence( pInputFileData, (unsigned short )context.iTabColumns));
+                        (void )printf( "\nString at index %d is :\n%s\n", context.iTabColumns, mySentence( pInputFileData, (unsigned short )context.iTabColumns, FALSE));
                     }
                     else
                     {
