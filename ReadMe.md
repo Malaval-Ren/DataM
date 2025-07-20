@@ -8,7 +8,11 @@ _Last review: July 20th, 2025, by Renaud Malaval_
 
 ## Convert many stuff
 
-Just a little software to help **Apple IIGS** cross dev
+Just a little software to help **Apple IIGS** cross development
+
+Convert a list of strings in a .txt file to a .bin file with at beginning index table to a string all stored after.  
+Line begin by "/* " are ignored.  
+Empty line are ignored.
 
 ## License
 
@@ -17,7 +21,7 @@ This software is under the **GPL v3** license
 ## Help usage
 
 ```bash
-datam.exe v1.11.12.29, Copyright (c) 2022..2025 R. Malaval & F. Mure
+datam.exe v1.11.12.29, Copyright (c) 2024..2025 R. Malaval & F. Mure
 
 Usage: datam <option> "<filespec>" <convmspec> "<number>" "<filespec>" "<output folder>"
 
@@ -74,9 +78,5 @@ co worker - **Frédéric Mure**
 [The Byte Works](https://www.byteworks.us/Products.html) - Mike Westerfield
 
 [GoldenGate](https://goldengate.gitlab.io/) - Kelvin W Sherlock
-
-## Owner
-
-**Renaud Malaval** renaud.malaval@free.fr
 
 Have Fun :exclamation:
