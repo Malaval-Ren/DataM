@@ -1,7 +1,10 @@
 
 # **DataM**
 
-![Alt text](./MM_PowerUp_256x256.png "DataM") ![Alt text](./gplv3-127x51.png "license") 
+![Alt text](./MM_PowerUp_256x256.png "DataM")    ![Alt text](./gplv3-127x51.png "license") 
+
+_Creation: June 13th, 2024..2025, by Renaud Malaval_  
+_Last review: July 20th, 2025, by Renaud Malaval_
 
 ## Convert many stuff
 
@@ -9,7 +12,7 @@ Just a little software to help **Apple IIGS** cross dev
 
 ## License
 
-This software is under the **GPLv3** license
+This software is under the **GPL v3** license
 
 ## Help usage
 
