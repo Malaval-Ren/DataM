@@ -18,6 +18,10 @@ Empty line are ignored.
 
 This software is under the **GPL v3** license
 
+## Build
+
+Open the project file **datam.sln** with **Visual Studio Community 2022** and build it
+
 ## Help usage
 
 ```bash
